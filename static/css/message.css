@@ -41,5 +41,5 @@ div.message:not(:last-child) {
 }
 
 .record-content p {
-    margin-bottom: 2px;
+    margin-bottom: 0;
 }
