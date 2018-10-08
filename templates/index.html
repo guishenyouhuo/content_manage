@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    客户意向管理|首页
+{% endblock %}
+
+{% block nav_home_active %} active {% endblock %}
+
+{% block header_extends %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block content %}
+    <h3 class="home-content">意向客户管理系统--{{ user.username }}</h3>
+{% endblock %}

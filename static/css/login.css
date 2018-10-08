@@ -1,0 +1,108 @@
+.login_m {
+    width: 403px;
+    height: 375px;
+    margin: 98px auto 0;
+}
+
+.login_logo {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.login_boder {
+    background: url(../images/login_m_bg.png) no-repeat;
+    height: 302px;
+    overflow: hidden;
+}
+
+.login_padding {
+    padding: 20px 47px 20px 47px;
+}
+
+.login_boder h2 {
+    color: #4f5d80;
+    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: normal;
+    margin-bottom: 11px;
+}
+
+.forget_model_h2 {
+    color: #4f5d80;
+    font-size: 12px;
+    font-weight: normal;
+    margin-bottom: 11px;
+}
+
+.login_boder input.txt_input {
+    width: 295px;
+    height: 36px;
+    border: 1px solid #cad2db;
+    padding: 0 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    line-height: 20px;
+    font-size: 14px;
+    color: #717171;
+    font-family: Arial, serif;
+}
+
+.login_boder input.txt_input2 {
+    margin-bottom: 10px;
+}
+
+.login_boder input.txt_input:focus {
+    transition: border linear .2s, box-shadow linear .2s;
+    -moz-transition: border linear .2s, -moz-box-shadow linear .2s;
+    -webkit-transition: border linear .2s, -webkit-box-shadow linear .2s;
+    outline: none;
+    box-shadow: 0 0 8px rgba(173, 173, 173, .5);
+    -moz-box-shadow: 0 0 8px rgba(173, 173, 173, .5);
+    -webkit-box-shadow: 0 0 8px rgba(173, 173, 173, 3);
+    border: 1px solid #6192c8;
+}
+
+.login_boder p.forgot {
+    font-size: 11px;
+    text-align: right;
+    margin-bottom: 10px;
+}
+
+.login_boder p.forgot a, .login_boder p.forgot a:visited {
+    color: #8c8e91;
+}
+
+.login_boder p.forgot a:hover {
+    color: #206fd5;
+}
+
+.rem_sub input.sub_button {
+    float: right;
+    width: 122px;
+    height: 32px;
+    background: url(../images/site_bg.png) no-repeat -153px -850px;
+    border: none;
+    color: #FFF;
+    padding-bottom: 2px;
+    font-size: 14px;
+    font-weight: bold;
+    margin-right: 15px;
+}
+
+.rem_sub input.sub_button:hover {
+    background-position: -153px -882px;
+    cursor: pointer;
+}
+
+.rem_sub .rem_sub_l {
+    float: left;
+    font-size: 12px;
+    height: 33px;
+    line-height: 33px;
+}
+
+.rem_sub input#checkbox {
+    margin-right: 5px;
+    vertical-align: middle;
+}

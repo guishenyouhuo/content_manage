@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    客户意向管理|留言管理
+{% endblock %}
+
+{% block nav_message_active %}active{% endblock %}
+
+{% block header_extends %}
+    <link rel="stylesheet" href="{% static 'css/message.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            {% block left_content %}
+                <div class="hidden-xs col-sm-3 col-md-2 col-lg-2">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">我的任务</div>
+                        <div class="panel-body">
+                            <ul class="message-tasks">
+                                <li>
+                                    <a href="{% url 'message_task' 0 %}">今日任务</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'message_task' 1 %}">明日任务</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'message_task' 2 %}">后天任务</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'message_task' 3 %}">历史任务</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">我的留言管理</div>
+                        <div class="panel-body">
+                            <ul>
+                                <li>
+                                    <a href="{% url 'show_message' %}">全部留言</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'unvisit_message' %}">未回访留言</a>
+                                </li>
+                                <li>
+                                    <a href="{% url 'add_message'%}">手动添加留言</a>
+                                </li>
+                                <li>
+                                    <a href="#">意向组</a>
+                                </li>
+                                <li>
+                                    <a href="#">已做客户</a>
+                                </li>
+                                <li>
+                                    <a href="#">留言搜索</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            {% endblock %}
+            {% block main_content %}
+                <div class="col-xs-12 col-sm-9 col-md-10 col-lg-10">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            {% block block_list_title %}{{ message_title }}{% endblock %}
+                        </div>
+                        <div class="panel-body">
+                            {% for message in message_list %}
+                                <div class="message">
+                                    <div class="message-header">
+                                        <div class="message-link">
+                                            <a href="{% url 'edit_message' message.pk %}">
+                                                {{ message.get_cust_name }}
+                                                ({{ message.cust_mobile }})
+                                            </a>
+                                        </div>
+                                        <div class="next-visit">
+                                            <span class="glyphicon glyphicon-calendar"></span>
+                                            {{ message.get_visit_date }}
+                                        </div>
+                                    </div>
+                                    <div class="message-content">
+                                        &nbsp;&nbsp;
+                                        <span class="glyphicon glyphicon-tag"></span>
+                                        {{ message.get_source_tag }}&nbsp;&nbsp;&nbsp;
+                                        <span class="glyphicon glyphicon-time"></span>
+                                        {{ message.created_time|date:"Y-m-d H:i:s" }}&nbsp;&nbsp;&nbsp;
+                                        <span class="glyphicon glyphicon-home"></span>
+                                        {{ message.get_cust_address }}&nbsp;&nbsp;&nbsp;
+                                        <span class="glyphicon glyphicon-user"></span>
+                                        {{ message.follow_user.user.username }}
+                                        {% if message.last_follow_user %}
+                                            <span class="glyphicon glyphicon-hand-left"></span>
+                                            {{ message.last_follow_user.user.username }}
+                                        {% endif %}
+                                        &nbsp;&nbsp;&nbsp;
+                                        <div class="cust-message">
+                                            <span style="font-size: 14px; font-weight: bold;">客户留言：</span>
+                                            {{ message.get_message }}
+                                        </div>
+                                        <div class="visit-record">
+                                            <div class="visit-title">回访记录：</div>
+                                            <div class="record-content">
+                                                {{ message.get_visit_record|safe }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            {% empty %}
+                                <div class="message">
+                                    <p>{{ no_message_tip }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {#                <div class="paginator">#}
+                    {#                    <ul class="pagination">#}
+                    {#                        <li>#}
+                    {#                            {% if page_of_blogs.has_previous %}#}
+                    {#                                <a href="?page={{ page_of_blogs.previous_page_number }}" aria-label="Previous">#}
+                    {#                                    <span aria-hidden="true">&laquo;</span>#}
+                    {#                                </a>#}
+                    {#                            {% else %}#}
+                    {#                                <span aria-hidden="true">&laquo;</span>#}
+                    {#                            {% endif %}#}
+                    {#                        </li>#}
+                    {##}
+                    {#                        {% for page_num in page_range %}#}
+                    {#                            {% if page_num == page_of_blogs.number %}#}
+                    {#                                <li class="active"><span>{{ page_num }}</span></li>#}
+                    {#                            {% else %}#}
+                    {#                                {% if page_num == '...' %}#}
+                    {#                                    <li><span>{{ page_num }}</span></li>#}
+                    {#                                {% else %}#}
+                    {#                                    <li><a href="?page={{ page_num }}"><span>{{ page_num }}</span></a></li>#}
+                    {#                                {% endif %}#}
+                    {#                            {% endif %}#}
+                    {#                        {% endfor %}#}
+                    {##}
+                    {#                        <li>#}
+                    {#                            {% if page_of_blogs.has_next %}#}
+                    {#                                <a href="?page={{ page_of_blogs.next_page_number }}" aria-label="Next">#}
+                    {#                                    <span aria-hidden="true">&raquo;</span>#}
+                    {#                                </a>#}
+                    {#                            {% else %}#}
+                    {#                                <span aria-hidden="true">&raquo;</span>#}
+                    {#                            {% endif %}#}
+                    {#                        </li>#}
+                    {#                    </ul>#}
+                    {#                    <p>#}
+                    {#                        共有{{ page_of_blogs.paginator.count }}篇博客,#}
+                    {#                        当前第{{ page_of_blogs.number }}页，#}
+                    {#                        共{{ page_of_blogs.paginator.num_pages }}页#}
+                    {#                    </p>#}
+                    {#                </div>#}
+                </div>
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}

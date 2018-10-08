@@ -1,0 +1,45 @@
+div.message:not(:last-child) {
+    margin-bottom: 1em;
+    padding-bottom: 1em;
+    border-bottom: 1px solid #eee;
+}
+
+.message-header {
+    height: 35px;
+}
+
+.message-link {
+    font-size: 1.5em;
+    float: left;
+}
+
+.next-visit {
+    float: right;
+    margin-right: 10px;
+}
+
+.cust-message {
+    padding: 5px 5px;
+}
+
+.visit-record {
+    display: inline-block;
+    padding: 0 5px;
+}
+
+.visit-title {
+    font-size: 14px;
+    font-weight: bold;
+    display: inline;
+    float: left;
+}
+
+.record-content {
+    display: inline;
+    float: left;
+    padding-left: 4px;
+}
+
+.record-content p {
+    margin-bottom: 2px;
+}
