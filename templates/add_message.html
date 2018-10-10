@@ -22,7 +22,7 @@
                 {% block block_list_title %}手动添加留言{% endblock %}
             </div>
             <div class="panel-body">
-                <form class="form_body" action="" method="post">
+                <form class="form_body" action="" method="post" autocomplete="off">
                     {% csrf_token %}
                     {% for field in message_form %}
                         <div class="form_field">
