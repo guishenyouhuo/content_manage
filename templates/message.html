@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 
+{% load message_tags %}
+
 {% block title %}
     客户意向管理|留言管理
 {% endblock %}
@@ -46,10 +48,10 @@
                                     <a href="{% url 'unvisit_message' %}">未回访留言</a>
                                 </li>
                                 <li>
-                                    <a href="{% url 'add_message'%}">手动添加留言</a>
+                                    <a href="{% url 'add_message' %}">手动添加留言</a>
                                 </li>
                                 <li>
-                                    <a href="#">意向组</a>
+                                    <a href="{% url 'intent_message' %}">意向组</a>
                                 </li>
                                 <li>
                                     <a href="#">已做客户</a>
@@ -77,6 +79,16 @@
                                                 {{ message.get_cust_name }}
                                                 ({{ message.cust_mobile }})
                                             </a>
+                                        </div>
+                                        <div class="message-operate">
+                                            <div class="intent" onclick="intentChange(this, {{ message.pk }})">
+                                                <span class="glyphicon glyphicon-star {% get_message_status message %}"></span>
+                                                <span class="intent-operate-text" >{% get_intent_operate message %}</span>
+                                            </div>
+                                            <div class="trans-to">
+                                                <span class="glyphicon glyphicon-hand-right"></span>
+                                                <span>转移给...</span>
+                                            </div>
                                         </div>
                                         <div class="next-visit">
                                             <span class="glyphicon glyphicon-calendar"></span>
@@ -118,48 +130,123 @@
                             {% endfor %}
                         </div>
                     </div>
-                    {#                <div class="paginator">#}
-                    {#                    <ul class="pagination">#}
-                    {#                        <li>#}
-                    {#                            {% if page_of_blogs.has_previous %}#}
-                    {#                                <a href="?page={{ page_of_blogs.previous_page_number }}" aria-label="Previous">#}
-                    {#                                    <span aria-hidden="true">&laquo;</span>#}
-                    {#                                </a>#}
-                    {#                            {% else %}#}
-                    {#                                <span aria-hidden="true">&laquo;</span>#}
-                    {#                            {% endif %}#}
-                    {#                        </li>#}
-                    {##}
-                    {#                        {% for page_num in page_range %}#}
-                    {#                            {% if page_num == page_of_blogs.number %}#}
-                    {#                                <li class="active"><span>{{ page_num }}</span></li>#}
-                    {#                            {% else %}#}
-                    {#                                {% if page_num == '...' %}#}
-                    {#                                    <li><span>{{ page_num }}</span></li>#}
-                    {#                                {% else %}#}
-                    {#                                    <li><a href="?page={{ page_num }}"><span>{{ page_num }}</span></a></li>#}
-                    {#                                {% endif %}#}
-                    {#                            {% endif %}#}
-                    {#                        {% endfor %}#}
-                    {##}
-                    {#                        <li>#}
-                    {#                            {% if page_of_blogs.has_next %}#}
-                    {#                                <a href="?page={{ page_of_blogs.next_page_number }}" aria-label="Next">#}
-                    {#                                    <span aria-hidden="true">&raquo;</span>#}
-                    {#                                </a>#}
-                    {#                            {% else %}#}
-                    {#                                <span aria-hidden="true">&raquo;</span>#}
-                    {#                            {% endif %}#}
-                    {#                        </li>#}
-                    {#                    </ul>#}
-                    {#                    <p>#}
-                    {#                        共有{{ page_of_blogs.paginator.count }}篇博客,#}
-                    {#                        当前第{{ page_of_blogs.number }}页，#}
-                    {#                        共{{ page_of_blogs.paginator.num_pages }}页#}
-                    {#                    </p>#}
-                    {#                </div>#}
+                    <div class="paginator">
+                        <ul class="pagination">
+                            <li>
+                                {% if page_of_messages.has_previous %}
+                                    <a href="?page={{ page_of_messages.previous_page_number }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                {% else %}
+                                    <span aria-hidden="true">&laquo;</span>
+                                {% endif %}
+                            </li>
+
+                            {% for page_num in page_range %}
+                                {% if page_num == page_of_messages.number %}
+                                    <li class="active"><span>{{ page_num }}</span></li>
+                                {% else %}
+                                    {% if page_num == '...' %}
+                                        <li><span>{{ page_num }}</span></li>
+                                    {% else %}
+                                        <li><a href="?page={{ page_num }}"><span>{{ page_num }}</span></a></li>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+
+                            <li>
+                                {% if page_of_messages.has_next %}
+                                    <a href="?page={{ page_of_messages.next_page_number }}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                {% else %}
+                                    <span aria-hidden="true">&raquo;</span>
+                                {% endif %}
+                            </li>
+                        </ul>
+                        <p>
+                            共有<span class="message-count">{{ page_of_messages.paginator.count }}</span>条留言,
+                            当前第{{ page_of_messages.number }}页，
+                            共{{ page_of_messages.paginator.num_pages }}页
+                        </p>
+                    </div>
                 </div>
             {% endblock %}
         </div>
     </div>
+{% endblock %}
+
+{% block script_extends %}
+    <script type="text/javascript">
+        function intentChange(obj, object_id) {
+            var isIntented = obj.getElementsByClassName('active').length !== 0;
+            var title = '确认添加意向？';
+            var content = '添加意向之后，可到意向组查看！';
+            if (isIntented) {
+                title = '确认移除意向？';
+                content = '移除意向之后，意向组中查看不到该条留言！';
+            }
+            $.confirm({
+                title: title,
+                content: content,
+                buttons: {
+                    confirm: {
+                            text: "确认",
+                            btnClass: 'btn-primary',
+                            keys: ['enter'],
+                            action: function () {
+                                $.ajax({
+                                    url: "{% url 'intent_change' %}",
+                                    type: 'GET',
+                                    data: {
+                                        object_id: object_id,
+                                        is_intented: isIntented
+                                    },
+                                    cache: false,
+                                    success: function (data) {
+                                        console.log(data);
+                                        if (data['status'] === 'SUCCESS') {
+                                            // 更新意向状态，更新操作文字
+                                            var element = $(obj.getElementsByClassName('glyphicon-star'));
+                                            var operateText = $(obj.getElementsByClassName('intent-operate-text'));
+                                            if (isIntented) {
+                                                element.removeClass('active');
+                                                operateText.text('添加意向');
+                                                isIntented = false;
+                                                var title = '{{ message_title }}';
+                                                if (title === '我的意向组') {
+                                                    // 如果是意向组页面，需要将移除意向组的那条隐藏
+                                                    var messagesBody = $(obj).parents('.panel-body')[0];
+                                                    var messageDiv = $(obj).parents('.message')[0];
+                                                    messagesBody.removeChild(messageDiv);
+                                                    var messageCount = parseInt($('.message-count').text());
+                                                    messageCount--;
+                                                    $('.message-count').text(messageCount);
+                                                }
+                                            } else {
+                                                element.addClass('active');
+                                                operateText.text('移除意向');
+                                                isIntented = true;
+                                            }
+                                        } else {
+                                            $.alert('操作失败！');
+                                        }
+                                    },
+                                    error: function (xhr) {
+                                        console.log(xhr);
+                                    }
+                                });
+                            },
+                    },
+                    cancel: {
+                        text: "取消",
+                        keys: ['esc'],
+                        action: function () {
+
+                        },
+                    }
+                }
+            });
+        }
+    </script>
 {% endblock %}

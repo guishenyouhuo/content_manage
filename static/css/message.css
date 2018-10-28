@@ -43,3 +43,33 @@ div.message:not(:last-child) {
 .record-content p {
     margin-bottom: 0;
 }
+
+div.paginator {
+    text-align: center;
+    margin-top: 0;
+}
+
+div .message-operate {
+    float: left;
+    margin-left: 20px;
+    margin-top: 10px;
+}
+
+div.intent {
+    color: #337ab7;
+    cursor: pointer;
+    display: inline;
+    font-size: 12px;
+}
+
+div.intent span.active {
+    color: #f22;
+}
+
+div.trans-to {
+    color: #337ab7;
+    cursor: pointer;
+    display: inline;
+    font-size: 13px;
+    margin-left: 30px;
+}
