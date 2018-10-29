@@ -145,3 +145,6 @@ CKEDITOR_CONFIGS = {
         'resize_enabled': False,
     }
 }
+
+# 自定义参数
+EACH_PAGE_MESSAGE_NUMBERS = 7
