@@ -85,7 +85,7 @@
                                                 <span class="glyphicon glyphicon-star {% get_message_status message %}"></span>
                                                 <span class="intent-operate-text" >{% get_intent_operate message %}</span>
                                             </div>
-                                            <div class="trans-to" onclick="transToOther(this, {{ message.pk }}, {{ message.follow_user.user_num }})">
+                                            <div class="trans-to" onclick="transToOther(this, {{ message.pk }}, {{ message.follow_user.user.pk }})">
                                                 <span class="glyphicon glyphicon-hand-right"></span>
                                                 <span class="trans-to-text">转移给...</span>
                                             </div>
@@ -191,52 +191,52 @@
                 content: content,
                 buttons: {
                     confirm: {
-                            text: "确认",
-                            btnClass: 'btn-primary',
-                            keys: ['enter'],
-                            action: function () {
-                                $.ajax({
-                                    url: "{% url 'intent_change' %}",
-                                    type: 'GET',
-                                    data: {
-                                        object_id: object_id,
-                                        is_intented: isIntented
-                                    },
-                                    cache: false,
-                                    success: function (data) {
-                                        console.log(data);
-                                        if (data['status'] === 'SUCCESS') {
-                                            // 更新意向状态，更新操作文字
-                                            var element = $(obj.getElementsByClassName('glyphicon-star'));
-                                            var operateText = $(obj.getElementsByClassName('intent-operate-text'));
-                                            if (isIntented) {
-                                                element.removeClass('active');
-                                                operateText.text('添加意向');
-                                                isIntented = false;
-                                                var title = '{{ message_title }}';
-                                                if (title === '我的意向组') {
-                                                    // 如果是意向组页面，需要将移除意向组的那条隐藏
-                                                    var messagesBody = $(obj).parents('.panel-body')[0];
-                                                    var messageDiv = $(obj).parents('.message')[0];
-                                                    messagesBody.removeChild(messageDiv);
-                                                    var messageCount = parseInt($('.message-count').text());
-                                                    messageCount--;
-                                                    $('.message-count').text(messageCount);
-                                                }
-                                            } else {
-                                                element.addClass('active');
-                                                operateText.text('移除意向');
-                                                isIntented = true;
+                        text: "确认",
+                        btnClass: 'btn-primary',
+                        keys: ['enter'],
+                        action: function () {
+                            $.ajax({
+                                url: "{% url 'intent_change' %}",
+                                type: 'GET',
+                                data: {
+                                    object_id: object_id,
+                                    is_intented: isIntented
+                                },
+                                cache: false,
+                                success: function (data) {
+                                    console.log(data);
+                                    if (data['status'] === 'SUCCESS') {
+                                        // 更新意向状态，更新操作文字
+                                        var element = $(obj.getElementsByClassName('glyphicon-star'));
+                                        var operateText = $(obj.getElementsByClassName('intent-operate-text'));
+                                        if (isIntented) {
+                                            element.removeClass('active');
+                                            operateText.text('添加意向');
+                                            isIntented = false;
+                                            var title = '{{ message_title }}';
+                                            if (title === '我的意向组') {
+                                                // 如果是意向组页面，需要将移除意向组的那条隐藏
+                                                var messagesBody = $(obj).parents('.panel-body')[0];
+                                                var messageDiv = $(obj).parents('.message')[0];
+                                                messagesBody.removeChild(messageDiv);
+                                                var messageCount = parseInt($('.message-count').text());
+                                                messageCount--;
+                                                $('.message-count').text(messageCount);
                                             }
                                         } else {
-                                            $.alert('操作失败！');
+                                            element.addClass('active');
+                                            operateText.text('移除意向');
+                                            isIntented = true;
                                         }
-                                    },
-                                    error: function (xhr) {
-                                        console.log(xhr);
+                                    } else {
+                                        $.alert('操作失败！');
                                     }
-                                });
-                            },
+                                },
+                                error: function (xhr) {
+                                    console.log(xhr);
+                                }
+                            });
+                        },
                     },
                     cancel: {
                         text: "取消",
@@ -252,7 +252,9 @@
         // 用户列表全局变量
         var userList = new Array();
         function transToOther(eleObj, msgId, curUser) {
-            console.log(userList.length);
+            if (eleObj.getElementsByClassName('trans-select').length !== 0) {
+                return;
+            }
             if (userList.length === 0) {
                 $.ajax({
                     url: "{% url 'get_user_list' %}",
@@ -261,13 +263,61 @@
                     data: {
                     },
                     success: function (data) {
-                        console.log(data);
+                        userList = data['user_list'];
+                        doTransUser(eleObj, msgId, curUser);
                     },
                     error: function (xhr) {
                         console.log(xhr);
                     }
                 });
+            } else {
+                doTransUser(eleObj, msgId, curUser);
             }
+        }
+        function doTransUser(eleObj, msgId, curUser) {
+            if (userList.length === 0) {
+                return;
+            }
+            var selectHtml = '<select class="trans-select" name="trans-select" onChange="selectTransUser(&quot;' + eleObj + '&quot;,&quot;' + msgId + '&quot;)";>' +
+                             '<option value="---">--请选择--</option>';
+            for (var i = 0; i < userList.length; i++) {
+                var user = userList[i];
+                if (user['id'] === curUser) {
+                    continue;
+                }
+                selectHtml += '<option value=' + user['id'] + '>' + user['username'] + '</option>';
+            }
+            selectHtml += '</select>';
+            $(eleObj).append(selectHtml);
+        }
+        function selectTransUser(eleObj, msgId) {
+            var selectVal = $(".trans-select").val();
+            if (selectVal === '---') {
+                return;
+            }
+            var selectName = $(".trans-select").find("option:selected").text();
+            $.confirm({
+                title: '确认移动留言？',
+                content: '请确认是否移动给' + selectName + '? 移动之后自己将无法看到！',
+                buttons: {
+                    confirm: {
+                        text: "确认",
+                        btnClass: 'btn-primary',
+                        keys: ['enter'],
+                        action: function () {
+
+                            console.log('aaaaaa' + selectVal);
+                        },
+                    },
+                    cancel: {
+                        text: "取消",
+                        keys: ['esc'],
+                        action: function () {
+
+                        },
+                    }
+                }
+            });
         }
     </script>
 {% endblock %}

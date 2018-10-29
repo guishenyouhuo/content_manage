@@ -7,6 +7,7 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.core import serializers
+from django.forms.models import model_to_dict
 from .models import CustMessage, UserProfile
 from .forms import LoginForm, MessageModelForm as MessageForm
 
@@ -207,17 +208,9 @@ def intent_change(request):
 
 def get_user_list(request):
     users = User.objects.filter(is_active=True, is_superuser=False)
-    # users = UserProfile.objects.all()
-    # for user in users:
-    #     user_list.append(user)
-    # print(user_list)
-    # users = CustMessage.objects.all()
-    for row in users:
-        print(row)
-    # desc = ['id', 'username', 'user_num']
-    # data =
-    data = serializers.serialize('json', users)
-    user_list = list(data)
+    user_list = []
+    for user in users:
+        user_list.append(model_to_dict(user))
     print(user_list)
     data = {'user_list': user_list, 'status': 'SUCCESS'}
     return JsonResponse(data)
