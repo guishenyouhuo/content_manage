@@ -85,9 +85,9 @@
                                                 <span class="glyphicon glyphicon-star {% get_message_status message %}"></span>
                                                 <span class="intent-operate-text" >{% get_intent_operate message %}</span>
                                             </div>
-                                            <div class="trans-to">
+                                            <div class="trans-to" onclick="transToOther(this, {{ message.pk }}, {{ message.follow_user.user_num }})">
                                                 <span class="glyphicon glyphicon-hand-right"></span>
-                                                <span>转移给...</span>
+                                                <span class="trans-to-text">转移给...</span>
                                             </div>
                                         </div>
                                         <div class="next-visit">
@@ -247,6 +247,27 @@
                     }
                 }
             });
+        }
+
+        // 用户列表全局变量
+        var userList = new Array();
+        function transToOther(eleObj, msgId, curUser) {
+            console.log(userList.length);
+            if (userList.length === 0) {
+                $.ajax({
+                    url: "{% url 'get_user_list' %}",
+                    type: 'GET',
+                    cache: false,
+                    data: {
+                    },
+                    success: function (data) {
+                        console.log(data);
+                    },
+                    error: function (xhr) {
+                        console.log(xhr);
+                    }
+                });
+            }
         }
     </script>
 {% endblock %}

@@ -12,4 +12,5 @@ urlpatterns = [
     path('edit/<int:message_id>', views.edit_message, name='edit_message'),
     path('intent_change', views.intent_change, name='intent_change'),
     path('intent_message', views.intent_message, name='intent_message'),
+    path('get_user_list', views.get_user_list, name='get_user_list'),
 ]
