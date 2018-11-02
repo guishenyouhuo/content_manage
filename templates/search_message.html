@@ -1,0 +1,45 @@
+{% extends 'message.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    客户意向管理|搜索留言
+{% endblock %}
+
+{% block nav_message_active %}active{% endblock %}
+
+{% block header_extends %}
+    <link rel="stylesheet" href="{% static 'css/add_message.css' %}">
+    <script type="text/javascript" src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
+    <script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
+    <script type="text/javascript" src="{% static "laydate/laydate.js" %}"></script>
+{% endblock %}
+
+{% block main_content %}
+    <div class="col-xs-12 col-sm-9 col-md-10 col-lg-10">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                {% block block_list_title %}根据条件搜索留言{% endblock %}
+            </div>
+            <div class="panel-body">
+                <form class="form_body" action="" method="post" autocomplete="off">
+                    {% csrf_token %}
+                    {% for field in search_form %}
+                        <div class="form_field">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                        </div><p class="text-danger">{{ field.errors.as_text }}</p>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary pull-right" style="margin-top: -44px; margin-right: 200px;">
+                        {% block submit_btn %}
+                            搜索
+                        {% endblock %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script_extends %}
+{% endblock %}

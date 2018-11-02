@@ -73,3 +73,7 @@ div.trans-to {
     font-size: 13px;
     margin-left: 30px;
 }
+
+.div-hide {
+    display: none;
+}

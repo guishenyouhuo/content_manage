@@ -42,7 +42,7 @@
                         <div class="panel-body">
                             <ul>
                                 <li>
-                                    <a href="{% url 'show_message' %}">全部留言</a>
+                                    <a href="{% url 'show_message' %}">我的全部留言</a>
                                 </li>
                                 <li>
                                     <a href="{% url 'unvisit_message' %}">未回访留言</a>
@@ -54,10 +54,10 @@
                                     <a href="{% url 'intent_message' %}">意向组</a>
                                 </li>
                                 <li>
-                                    <a href="#">已做客户</a>
+                                    <a href="{% url 'finished_message' %}">已做客户</a>
                                 </li>
                                 <li>
-                                    <a href="#">留言搜索</a>
+                                    <a href="{% url 'search_message' %}">留言搜索</a>
                                 </li>
                             </ul>
                         </div>
@@ -278,7 +278,11 @@
             if (userList.length === 0) {
                 return;
             }
-            var selectHtml = '<select class="trans-select" name="trans-select" onChange="selectTransUser(&quot;' + eleObj + '&quot;,&quot;' + msgId + '&quot;)";>' +
+            // 隐藏文字
+            var textElem = $(eleObj).children('.trans-to-text')[0];
+            $(textElem).addClass('div-hide');
+
+            var selectHtml = '<select class="trans-select" name="trans-select" onChange="selectTransUser(this ,&quot;' + msgId + '&quot;)";>' +
                              '<option value="---">--请选择--</option>';
             for (var i = 0; i < userList.length; i++) {
                 var user = userList[i];
@@ -290,12 +294,16 @@
             selectHtml += '</select>';
             $(eleObj).append(selectHtml);
         }
-        function selectTransUser(eleObj, msgId) {
+        function selectTransUser(selObj, msgId) {
             var selectVal = $(".trans-select").val();
             if (selectVal === '---') {
                 return;
             }
+            var transDiv = $(selObj).parent('.trans-to')[0];
+            var transText = $(transDiv).children('.trans-to-text')[0];
             var selectName = $(".trans-select").find("option:selected").text();
+            var selUserId = $(".trans-select").find("option:selected").val();
+            var messageDiv = $(selObj).parents('.message')[0];
             $.confirm({
                 title: '确认移动留言？',
                 content: '请确认是否移动给' + selectName + '? 移动之后自己将无法看到！',
@@ -305,15 +313,33 @@
                         btnClass: 'btn-primary',
                         keys: ['enter'],
                         action: function () {
-
-                            console.log('aaaaaa' + selectVal);
+                            // Ajax请求后台进行更新
+                            $.ajax({
+                                url: "{% url 'move_message' %}",
+                                type: 'GET',
+                                cache: false,
+                                data: {
+                                    message_id: msgId,
+                                    user_id: selUserId
+                                },
+                                success: function (data) {
+                                    $(messageDiv).remove();
+                                    var messageCount = parseInt($('.message-count').text());
+                                    messageCount--;
+                                    $('.message-count').text(messageCount);
+                                },
+                                error: function (xhr) {
+                                    console.log(xhr);
+                                }
+                            });
                         },
                     },
                     cancel: {
                         text: "取消",
                         keys: ['esc'],
                         action: function () {
-
+                            $(selObj).remove();
+                            $(transText).removeClass('div-hide');
                         },
                     }
                 }

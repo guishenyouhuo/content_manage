@@ -29,6 +29,21 @@ class LoginForm(forms.Form):
         return self.cleaned_data
 
 
+class SearchForm(forms.Form):
+    search_text = forms.CharField(
+        label='客户姓名或手机号码',
+        widget=forms.TextInput(
+            attrs={'class': 'form-control txt_input txt_input2', 'placeholder': '请输入客户姓名或手机号'}
+        )
+    )
+
+    def clean_search_text(self):
+        search_text = self.cleaned_data['search_text']
+        if search_text is None:
+            raise forms.ValidationError('搜索内容不能为空')
+        return search_text
+
+
 class MessageModelForm(forms.ModelForm):
     class Meta:
         model = CustMessage

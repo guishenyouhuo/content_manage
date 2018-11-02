@@ -6,10 +6,9 @@ from django.core.paginator import Paginator
 from django.conf import settings
 from django.http import JsonResponse
 from django.contrib.auth.models import User
-from django.core import serializers
 from django.forms.models import model_to_dict
 from .models import CustMessage, UserProfile
-from .forms import LoginForm, MessageModelForm as MessageForm
+from .forms import LoginForm, MessageModelForm as MessageForm, SearchForm
 
 
 # Create your views here.
@@ -96,6 +95,18 @@ def unvisit_message(request):
     return render(request, 'message.html', context)
 
 
+# 已完成留言(type=3)
+def finished_message(request):
+    user = request.user
+    if user.is_superuser:
+        forward_superuser(request)
+    message_list = CustMessage.objects.filter(follow_user=user.userprofile, type=3)
+    context = get_message_common_data(message_list, request)
+    context['message_title'] = '我的已完成留言'
+    context['no_message_tip'] = '暂无已完成留言'
+    return render(request, 'message.html', context)
+
+
 # 意向组留言(type=2)
 def intent_message(request):
     user = request.user
@@ -149,6 +160,27 @@ def build_message(cust_message, message_form):
     cust_message.next_visit_date = message_form.cleaned_data['next_visit_date']
     cust_message.type = 1
     # cust_message.source_tag = message_form.cleaned_data['s']
+
+
+def search_message(request):
+    context = {}
+    if request.method == 'POST':
+        search_form = SearchForm(request.POST)
+        if search_form.is_valid():
+            search_text = search_form.cleaned_data['search_text']
+            message_list = CustMessage.objects.filter(cust_mobile=search_text)
+            if not message_list:
+                message_list = CustMessage.objects.filter(cust_name=search_text)
+            context = get_message_common_data(message_list, request)
+            context['message_title'] = '留言搜索结果'
+            context['no_message_tip'] = '未搜索到留言'
+            return render(request, 'message.html', context)
+        else:
+            pass
+    else:
+        search_form = SearchForm()
+    context['search_form'] = search_form
+    return render(request, 'search_message.html', context)
 
 
 def add_message(request):
@@ -211,8 +243,20 @@ def get_user_list(request):
     user_list = []
     for user in users:
         user_list.append(model_to_dict(user))
-    print(user_list)
     data = {'user_list': user_list, 'status': 'SUCCESS'}
+    return JsonResponse(data)
+
+
+def move_message(request):
+    message_id = request.GET.get('message_id')
+    user_id = request.GET.get('user_id')
+    message = CustMessage.objects.get(pk=message_id)
+    last_user = message.follow_user
+    cur_user = UserProfile.objects.get(user_id=user_id)
+    message.follow_user = cur_user
+    message.last_follow_user = last_user
+    message.save()
+    data = {'status': 'SUCCESS'}
     return JsonResponse(data)
 
 
