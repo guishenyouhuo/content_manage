@@ -20,5 +20,6 @@ from message_core import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.index, name='index'),
+    path('manager/', views.manager, name='manager'),
     path('message/', include('message_core.urls'))
 ]

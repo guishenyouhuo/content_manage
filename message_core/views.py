@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 from .models import CustMessage, UserProfile
-from .forms import LoginForm, MessageModelForm as MessageForm, SearchForm
+from .forms import LoginForm, MessageModelForm as MessageForm, SearchForm, ManagerLoginForm
 
 
 # Create your views here.
@@ -19,6 +19,13 @@ def index(request):
     if not user.is_authenticated or user.is_superuser:
         return redirect(reverse('login'), args=[])
     return render(request, 'index.html', {})
+
+
+def manager(request):
+    user = request.user
+    if not user.is_authenticated or not user.is_superuser:
+        return redirect(reverse('to_manage'), args=[])
+    return render(request, 'manager.html', {})
 
 
 def login(request):
@@ -261,7 +268,16 @@ def move_message(request):
 
 
 def to_manage(request):
-    return render(request, 'manger_login.html')
+    if request.method == 'POST':
+        login_form = ManagerLoginForm(request.POST)
+        if login_form.is_valid():
+            user = login_form.cleaned_data['user']
+            auth.login(request, user)
+            return redirect(reverse('manager'), args=[])
+    else:
+        login_form = ManagerLoginForm()
+    context = {'login_form': login_form}
+    return render(request, 'manger_login.html', context)
 
 
 def logout(request):

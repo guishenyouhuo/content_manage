@@ -10,5 +10,28 @@
 {% endblock %}
 
 {% block content %}
-    管理员登录页面
+    <div class="containter">
+        <div class="row">
+            <div class="col-xs-2 col-xs-offset-5">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">管理员登录</h3>
+                    </div>
+                    <div class="panel-body">
+                        <form action="" method="post">
+                            {% csrf_token %}
+                            {% for field in login_form %}
+                                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                {{ field }}
+                                <p class="text-danger">{{ field.errors.as_text }}</p>
+                            {% endfor %}
+                            <span class="pull-left text-danger">{{ login_form.non_field_errors }}</span>
+                            <div class="clearfix"></div>
+                            <input type="submit" value="登录" class="btn btn-primary pull-right"/>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
