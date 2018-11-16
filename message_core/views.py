@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 from .models import CustMessage, UserProfile
-from .forms import LoginForm, MessageModelForm as MessageForm, SearchForm, ManagerLoginForm
+from .forms import LoginForm, MessageModelForm as MessageForm, SearchForm
 
 
 # Create your views here.
@@ -17,15 +17,9 @@ def index(request):
     user = request.user
     # 用户未登陆或者是管理员（管理员只能进入管理页面）
     if not user.is_authenticated or user.is_superuser:
+        logout(request)
         return redirect(reverse('login'), args=[])
     return render(request, 'index.html', {})
-
-
-def manager(request):
-    user = request.user
-    if not user.is_authenticated or not user.is_superuser:
-        return redirect(reverse('to_manage'), args=[])
-    return render(request, 'manager.html', {})
 
 
 def login(request):
@@ -86,7 +80,7 @@ def show_message(request):
     context = get_message_common_data(message_list, request)
     context['message_title'] = '我的全部资源'
     context['no_message_tip'] = '暂无留言内容'
-    return render(request, 'message.html', context)
+    return render(request, 'message/message.html', context)
 
 
 # 未回访留言
@@ -99,7 +93,7 @@ def unvisit_message(request):
     context = get_message_common_data(message_list, request)
     context['message_title'] = '我的未回访留言'
     context['no_message_tip'] = '暂无未回访留言'
-    return render(request, 'message.html', context)
+    return render(request, 'message/message.html', context)
 
 
 # 已完成留言(type=3)
@@ -111,7 +105,7 @@ def finished_message(request):
     context = get_message_common_data(message_list, request)
     context['message_title'] = '我的已完成留言'
     context['no_message_tip'] = '暂无已完成留言'
-    return render(request, 'message.html', context)
+    return render(request, 'message/message.html', context)
 
 
 # 意向组留言(type=2)
@@ -123,7 +117,7 @@ def intent_message(request):
     context = get_message_common_data(message_list, request)
     context['message_title'] = '我的意向组'
     context['no_message_tip'] = '暂无意向留言'
-    return render(request, 'message.html', context)
+    return render(request, 'message/message.html', context)
 
 
 # 我的任务
@@ -155,7 +149,7 @@ def message_task(request, day):
     context = get_message_common_data(message_list, request)
     context['message_title'] = '我的' + task_name + '任务'
     context['no_message_tip'] = '暂无' + task_name + '任务'
-    return render(request, 'message.html', context)
+    return render(request, 'message/message.html', context)
 
 
 def build_message(cust_message, message_form):
@@ -181,13 +175,13 @@ def search_message(request):
             context = get_message_common_data(message_list, request)
             context['message_title'] = '留言搜索结果'
             context['no_message_tip'] = '未搜索到留言'
-            return render(request, 'message.html', context)
+            return render(request, 'message/message.html', context)
         else:
             pass
     else:
         search_form = SearchForm()
     context['search_form'] = search_form
-    return render(request, 'search_message.html', context)
+    return render(request, 'message/search_message.html', context)
 
 
 def add_message(request):
@@ -207,7 +201,7 @@ def add_message(request):
     else:
         message_form = MessageForm()
     context['message_form'] = message_form
-    return render(request, 'add_message.html', context)
+    return render(request, 'message/add_message.html', context)
 
 
 def edit_message(request, message_id):
@@ -229,7 +223,7 @@ def edit_message(request, message_id):
         message_form = MessageForm(instance=CustMessage.objects.get(pk=message_id))
         message_form.fields['cust_mobile'].widget.attrs['readonly'] = True
     context['message_form'] = message_form
-    return render(request, 'edit_message.html', context)
+    return render(request, 'message/edit_message.html', context)
 
 
 def intent_change(request):
@@ -265,19 +259,6 @@ def move_message(request):
     message.save()
     data = {'status': 'SUCCESS'}
     return JsonResponse(data)
-
-
-def to_manage(request):
-    if request.method == 'POST':
-        login_form = ManagerLoginForm(request.POST)
-        if login_form.is_valid():
-            user = login_form.cleaned_data['user']
-            auth.login(request, user)
-            return redirect(reverse('manager'), args=[])
-    else:
-        login_form = ManagerLoginForm()
-    context = {'login_form': login_form}
-    return render(request, 'manger_login.html', context)
 
 
 def logout(request):

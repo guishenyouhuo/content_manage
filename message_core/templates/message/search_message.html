@@ -1,14 +1,14 @@
-{% extends 'message.html' %}
+{% extends 'message/message.html' %}
 {% load staticfiles %}
 
 {% block title %}
-    客户意向管理|添加留言
+    客户意向管理|搜索留言
 {% endblock %}
 
 {% block nav_message_active %}active{% endblock %}
 
 {% block header_extends %}
-    <link rel="stylesheet" href="{% static 'css/add_message.css' %}">
+    <link rel="stylesheet" href="{% static 'message/css/add_message.css' %}">
     <script type="text/javascript" src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
     <script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
     <script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
@@ -19,20 +19,20 @@
     <div class="col-xs-12 col-sm-9 col-md-10 col-lg-10">
         <div class="panel panel-default">
             <div class="panel-heading">
-                {% block block_list_title %}手动添加留言{% endblock %}
+                {% block block_list_title %}根据条件搜索留言{% endblock %}
             </div>
             <div class="panel-body">
                 <form class="form_body" action="" method="post" autocomplete="off">
                     {% csrf_token %}
-                    {% for field in message_form %}
+                    {% for field in search_form %}
                         <div class="form_field">
                             <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }} <p class="text-danger">{{ field.errors.as_text }}</p>
-                        </div>
+                            {{ field }}
+                        </div><p class="text-danger">{{ field.errors.as_text }}</p>
                     {% endfor %}
-                    <button type="submit" class="btn btn-primary pull-right">
+                    <button type="submit" class="btn btn-primary pull-right" style="margin-top: -44px; margin-right: 200px;">
                         {% block submit_btn %}
-                            添加
+                            搜索
                         {% endblock %}
                     </button>
                 </form>
@@ -42,11 +42,4 @@
 {% endblock %}
 
 {% block script_extends %}
-    <script type="text/javascript">
-        //执行一个laydate实例
-        laydate.render({
-            elem: '#datepicker', //指定元素
-            format: 'yyyy/MM/dd'
-        });
-    </script>
 {% endblock %}

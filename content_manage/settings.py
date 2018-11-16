@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'message_core.apps.MessageCoreConfig',
     'message_core.apps.CkEditorConfig',
     'message_core.apps.CkEditorUploaderConfig',
+    'manager.apps.ManagerConfig',
 ]
 
 MIDDLEWARE = [
