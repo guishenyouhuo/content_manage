@@ -16,9 +16,11 @@ from .forms import LoginForm, MessageModelForm as MessageForm, SearchForm
 def index(request):
     user = request.user
     # 用户未登陆或者是管理员（管理员只能进入管理页面）
-    if not user.is_authenticated or user.is_superuser:
+    if not user.is_authenticated:
         logout(request)
         return redirect(reverse('login'), args=[])
+    if user.is_superuser:
+        return redirect(reverse('manager'), args=[])
     return render(request, 'index.html', {})
 
 
