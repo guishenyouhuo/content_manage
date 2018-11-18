@@ -1,0 +1,40 @@
+{% extends 'manager/manager.html' %}
+{% load staticfiles %}
+{% block title %}
+    客户意向管理|添加招商用户
+{% endblock %}
+{% block header_extends %}
+    <link rel="stylesheet" href="{% static 'manager/css/add_user.css' %}">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+{% block main_content %}
+    <div class="col-xs-12 col-sm-9 col-md-10 col-lg-10">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                {% block user-manage %}添加招商用户{% endblock %}
+            </div>
+            <div class="panel-body">
+                <form class="add_user_form" action="" method="post" autocomplete="off">
+                    {% csrf_token %}
+                    {% for field in profile_form %}
+                        <div class="form_field">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }} <p class="text-danger">{{ field.errors.as_text }}</p>
+                        </div>
+                    {% endfor %}
+                    {% for field in user_form %}
+                        <div class="form_field">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }} <p class="text-danger">{{ field.errors.as_text }}</p>
+                        </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary pull-left">
+                        {% block submit_btn %}
+                            添加
+                        {% endblock %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

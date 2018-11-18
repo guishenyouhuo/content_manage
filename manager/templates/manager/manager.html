@@ -24,14 +24,14 @@
             {% block left_content %}
                 <div class="hidden-xs col-sm-3 col-md-2 col-lg-2">
                     <div class="panel panel-default">
-                        <div class="panel-heading">用户管理</div>
+                        <div class="panel-heading">招商用户管理</div>
                         <div class="panel-body">
                             <ul class="message-tasks">
                                 <li>
-                                    <a href="#">添加用户</a>
+                                    <a href="{% url 'add_user' %}">添加招商用户</a>
                                 </li>
                                 <li>
-                                    <a href="#">查看所有用户</a>
+                                    <a href="{% url 'user_list' %}">查看招商用户</a>
                                 </li>
                             </ul>
                         </div>
@@ -41,10 +41,16 @@
                         <div class="panel-body">
                             <ul>
                                 <li>
-                                    <a href="#">全部留言</a>
+                                    <a href="#">查看全部留言</a>
                                 </li>
                                 <li>
                                     <a href="#">按分配人查看留言</a>
+                                </li>
+                                <li>
+                                    <a href="#">查看已做客户</a>
+                                </li>
+                                <li>
+                                    <a href="#">按分配人查看已做</a>
                                 </li>
                                 <li>
                                     <a href="#">手动添加留言</a>
@@ -53,10 +59,23 @@
                                     <a href="#">批量导入留言</a>
                                 </li>
                                 <li>
-                                    <a href="#">已做客户</a>
+                                    <a href="#">留言搜索</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">配置管理</div>
+                        <div class="panel-body">
+                            <ul>
+                                <li>
+                                    <a href="#">留言分配设置</a>
                                 </li>
                                 <li>
-                                    <a href="#">留言搜索</a>
+                                    <a href="#">来源配置</a>
+                                </li>
+                                <li>
+                                    <a href="#">Excel模板配置</a>
                                 </li>
                             </ul>
                         </div>

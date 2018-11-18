@@ -1,0 +1,14 @@
+.add_user_form {
+    width: 60%;
+    padding: 5px 10px;
+    margin: auto;
+}
+
+.add_user_form.form_field {
+    padding-bottom: 0;
+    margin-top: 5px;
+}
+
+.add_user_form input {
+    width: 50%;
+}

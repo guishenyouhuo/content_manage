@@ -1,7 +1,10 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib import auth
-from .forms import ManagerLoginForm
+from django.contrib.auth.models import User
+from django.db import transaction
+from message_core.models import UserProfile
+from .forms import ManagerLoginForm, UserForm, ProfileForm
 
 
 # Create your views here.
@@ -25,3 +28,32 @@ def to_manage(request):
         login_form = ManagerLoginForm()
     context = {'login_form': login_form}
     return render(request, 'manager/login.html', context)
+
+
+@transaction.atomic
+def add_user(request):
+    context = {}
+    if request.method == 'POST':
+        user_form = UserForm(request.POST)
+        profile_form = ProfileForm(request.POST)
+        if user_form.is_valid() and profile_form.is_valid():
+            user = User.objects.create()
+            user.username = user_form.cleaned_data['username']
+            user.set_password(user_form.cleaned_data['password'])
+            user_profile = UserProfile()
+            user_profile.user_num = profile_form.cleaned_data['user_num']
+            user_profile.user = user
+            user.save()
+            user_profile.save()
+    else:
+        user_form = UserForm()
+        profile_form = ProfileForm()
+    context['user_form'] = user_form
+    context['profile_form'] = profile_form
+    return render(request, 'manager/add_user.html', context)
+
+
+def show_user_list(request):
+    user_list = User.objects.filter(is_active=True, is_superuser=False)
+    context = {'user_list': user_list}
+    return render(request, 'manager/user_list.html', context)
