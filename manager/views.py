@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.contrib import auth
 from django.contrib.auth.models import User
 from django.db import transaction
+from django.http import JsonResponse
 from message_core.models import UserProfile
 from .forms import ManagerLoginForm, UserForm, ProfileForm
 
@@ -53,7 +54,27 @@ def add_user(request):
     return render(request, 'manager/add_user.html', context)
 
 
+def modify_user_pwd(request):
+    if request.method == 'POST':
+        pass
+    else:
+        user_id = request.GET.get('user_pk', 0)
+        cur_user = User.objects.get(pk=user_id)
+        if cur_user is None:
+            pass
+
+
 def show_user_list(request):
     user_list = User.objects.filter(is_active=True, is_superuser=False)
     context = {'user_list': user_list}
     return render(request, 'manager/user_list.html', context)
+
+
+def modify_user_pwd(request):
+    user_id = request.POST['modify_user_id']
+    user_pwd = request.POST['user_pwd_new']
+    user = User.objects.get(pk=user_id)
+    user.set_password(user_pwd)
+    user.save()
+    data = {'status': 'SUCCESS'}
+    return JsonResponse(data)

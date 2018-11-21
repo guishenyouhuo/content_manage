@@ -9,25 +9,28 @@
     <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'bootstrap-3.3.7/css/bootstrap.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/jquery-confirm.min.css' %}">
+    <script type="text/javascript" src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'bootstrap-3.3.7/js/bootstrap.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery-confirm.min.js' %}"></script>
     {% block header_extends %}{% endblock %}
 </head>
 <body>
 
-    {% block navbar %}
-        <div class="navba navbar-default navbar-fixed-top" role="navigation">
-            <div class="container-fluid">
-                <div class="navbar-header">
-                    <a class="navbar-brand" href="{% url 'index' %}">意向客户管理</a>
-                    <button class="navbar-toggle collapsed" data-target="
+{% block navbar %}
+    <div class="navba navbar-default navbar-fixed-top" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="{% url 'index' %}">意向客户管理</a>
+                <button class="navbar-toggle collapsed" data-target="
                     #navbar-collapse" data-toggle="collapse">
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                </div>
-                <div id="navbar-collapse" class="collapse navbar-collapse">
-                    {% block  navheader %}
-                        <ul class="nav navbar-nav">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+            </div>
+            <div id="navbar-collapse" class="collapse navbar-collapse">
+                {% block  navheader %}
+                    <ul class="nav navbar-nav">
                         <li class="{% block nav_home_active %}{% endblock %}">
                             <a href="/">首页</a>
                         </li>
@@ -35,40 +38,36 @@
                             <a href="{% url 'show_message' %}">留言管理</a>
                         </li>
                     </ul>
-                    {% endblock %}
-                    <ul class="nav navbar-nav navbar-right">
-                        {% if user.is_authenticated %}
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
-                                    {{ user.username }}
-                                    {% if user.has_nickname %}
-                                        ({{ user.get_nickname }})
-                                    {% endif %}
-                                    <span class="caret"></span>
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li><a href="#">个人资料</a></li>
-                                    <li><a href="#">修改密码</a></li>
-                                    {% if user.is_staff and user.is_superuser %}
-                                        <li><a href="{% url 'admin:index' %}">后台管理</a></li>
-                                    {% endif %}
-                                    <li><a href="{% url 'logout' %}?from={{ request.get_full_path }}">退出</a></li>
-                                </ul>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </div>
+                {% endblock %}
+                <ul class="nav navbar-nav navbar-right">
+                    {% if user.is_authenticated %}
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
+                                {{ user.username }}
+                                {% if user.has_nickname %}
+                                    ({{ user.get_nickname }})
+                                {% endif %}
+                                <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a href="#">个人资料</a></li>
+                                <li><a href="#">修改密码</a></li>
+                                {% if user.is_staff and user.is_superuser %}
+                                    <li><a href="{% url 'admin:index' %}">后台管理</a></li>
+                                {% endif %}
+                                <li><a href="{% url 'logout' %}?from={{ request.get_full_path }}">退出</a></li>
+                            </ul>
+                        </li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
-    {% endblock %}
+    </div>
+{% endblock %}
 
-    {% block content %}{% endblock %}
+{% block content %}{% endblock %}
 
-    {% block script_extends %}{% endblock %}
-
-    <script type="text/javascript" src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'bootstrap-3.3.7/js/bootstrap.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/jquery-confirm.min.js' %}"></script>
+{% block script_extends %}{% endblock %}
 
 
 </body>
