@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 from django.db import transaction
 from django.http import JsonResponse
 from message_core.models import UserProfile
+from message_core.views import get_message_common_data, forward_superuser
+from message_core.models import CustMessage
 from .forms import ManagerLoginForm, UserForm, ProfileForm
 
 
@@ -46,22 +48,13 @@ def add_user(request):
             user_profile.user = user
             user.save()
             user_profile.save()
+            return redirect(reverse('user_list'), args=[])
     else:
         user_form = UserForm()
         profile_form = ProfileForm()
     context['user_form'] = user_form
     context['profile_form'] = profile_form
     return render(request, 'manager/add_user.html', context)
-
-
-def modify_user_pwd(request):
-    if request.method == 'POST':
-        pass
-    else:
-        user_id = request.GET.get('user_pk', 0)
-        cur_user = User.objects.get(pk=user_id)
-        if cur_user is None:
-            pass
 
 
 def show_user_list(request):
@@ -78,3 +71,67 @@ def modify_user_pwd(request):
     user.save()
     data = {'status': 'SUCCESS'}
     return JsonResponse(data)
+
+
+def change_user(request):
+    user_id = request.GET.get('user_id')
+    user_status = request.GET.get('user_status')
+    user_profile = UserProfile.objects.get(user_id=user_id)
+    if user_status == '1':
+        user_profile.user_status = 0
+    else:
+        user_profile.user_status = 1
+    user_profile.save()
+    data = {'status': 'SUCCESS'}
+    return JsonResponse(data)
+
+
+def delete_user(request):
+    user_id = request.GET.get('user_id')
+    user = User.objects.get(pk=user_id)
+    user.delete()
+    data = {'status': 'SUCCESS'}
+    return JsonResponse(data)
+
+
+def show_message(request):
+    user = request.user
+    if not user.is_authenticated or not user.is_superuser:
+        return forward_superuser(request)
+    message_list = CustMessage.objects.exclude(type=0)
+    context = get_message_common_data(message_list, request)
+    context['message_title'] = '查看全部资源'
+    context['no_message_tip'] = '暂无资源'
+    return render(request, 'manager/message.html', context)
+
+
+def change_status(request):
+    message_id = request.GET.get('message_id')
+    message_status = request.GET.get('message_status')
+    message = CustMessage.objects.get(pk=message_id)
+    if message_status != '0':
+        message.type = 0
+    else:
+        message.type = 1
+    message.save()
+    data = {'status': 'SUCCESS'}
+    return JsonResponse(data)
+
+
+def del_message(request):
+    message_id = request.GET.get('message_id')
+    message = CustMessage.objects.get(pk=message_id)
+    message.delete()
+    data = {'status': 'SUCCESS'}
+    return JsonResponse(data)
+
+
+def show_trush(request):
+    user = request.user
+    if not user.is_authenticated or not user.is_superuser:
+        return forward_superuser(request)
+    message_list = CustMessage.objects.filter(type=0)
+    context = get_message_common_data(message_list, request)
+    context['message_title'] = '查看回收站资源'
+    context['no_message_tip'] = '回收站暂无资源'
+    return render(request, 'manager/message.html', context)

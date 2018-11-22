@@ -11,6 +11,7 @@
 
 {% block header_extends %}
     <link rel="stylesheet" href="{% static 'message/css/message.css' %}">
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -81,10 +82,24 @@
                                             </a>
                                         </div>
                                         <div class="message-operate">
-                                            <div class="intent" onclick="intentChange(this, {{ message.pk }})">
-                                                <span class="glyphicon glyphicon-star {% get_message_status message %}"></span>
-                                                <span class="intent-operate-text" >{% get_intent_operate message %}</span>
-                                            </div>
+                                            {% if not user.is_superuser %}
+                                                <div class="intent" onclick="intentChange(this, {{ message.pk }})">
+                                                    <span class="glyphicon glyphicon-star {% get_message_status message %}"></span>
+                                                    <span class="intent-operate-text" >{% get_intent_operate message %}</span>
+                                                </div>
+                                            {% else %}
+                                                <div class="intent" onclick="deleteMessage(this, {{ message.pk }}, {{ message.type }})">
+                                                    <span class="glyphicon {% get_del_icon message %}"></span>
+                                                    <span>{% get_del_operate message %}</span>
+                                                </div>
+                                                {% if message.type == 0 %}
+                                                    |
+                                                    <div class="intent" onclick="emptyMessage(this, {{ message.pk }})">
+                                                        <span class="glyphicon glyphicon-trash"></span>
+                                                        <span>彻底删除</span>
+                                                    </div>
+                                                {% endif %}
+                                            {% endif %}
                                             <div class="trans-to" onclick="transToOther(this, {{ message.pk }}, {{ message.follow_user.user.pk }})">
                                                 <span class="glyphicon glyphicon-hand-right"></span>
                                                 <span class="trans-to-text">转移给...</span>
@@ -303,10 +318,10 @@
             var transText = $(transDiv).children('.trans-to-text')[0];
             var selectName = $(".trans-select").find("option:selected").text();
             var selUserId = $(".trans-select").find("option:selected").val();
-            var messageDiv = $(selObj).parents('.message')[0];
+            // var messageDiv = $(selObj).parents('.message')[0];
             $.confirm({
-                title: '确认移动留言？',
-                content: '请确认是否移动给' + selectName + '? 移动之后自己将无法看到！',
+                title: '确认转移留言？',
+                content: '请确认是否转移给' + selectName + '?',
                 buttons: {
                     confirm: {
                         text: "确认",
@@ -323,10 +338,13 @@
                                     user_id: selUserId
                                 },
                                 success: function (data) {
+                                    /*
                                     $(messageDiv).remove();
                                     var messageCount = parseInt($('.message-count').text());
                                     messageCount--;
                                     $('.message-count').text(messageCount);
+                                    */
+                                    window.location.reload();
                                 },
                                 error: function (xhr) {
                                     console.log(xhr);
@@ -340,6 +358,89 @@
                         action: function () {
                             $(selObj).remove();
                             $(transText).removeClass('div-hide');
+                        },
+                    }
+                }
+            });
+        }
+        //删除资源(移入回收站)
+        function deleteMessage(cliObj, msgId, messageStatus) {
+            var titleText = '确认删除留言？';
+            var contentText = '请确认是否删除此条资源？ 删除之后可以到回收站查看或恢复！';
+            if (messageStatus === 0) {
+                titleText = '确认恢复留言？';
+                contentText = '请确认是否恢复此条资源？ 恢复之后即可对其进行正常操纵！';
+            }
+            $.confirm({
+                title: titleText,
+                content: contentText,
+                buttons: {
+                    confirm: {
+                        text: "提示",
+                        btnClass: 'btn-primary',
+                        keys: ['enter'],
+                        action: function () {
+                            // Ajax请求后台进行更新
+                            $.ajax({
+                                url: "{% url 'change_status' %}",
+                                type: 'GET',
+                                cache: false,
+                                data: {
+                                    message_id: msgId,
+                                    message_status: messageStatus
+                                },
+                                success: function (data) {
+                                    window.location.reload();
+                                },
+                                error: function (xhr) {
+                                    console.log(xhr);
+                                }
+                            });
+                        },
+                    },
+                    cancel: {
+                        text: "取消",
+                        keys: ['esc'],
+                        action: function () {
+
+                        },
+                    }
+                }
+            });
+        }
+        // 从回收站删除（永久删除！）
+        function emptyMessage(cliObj, msgId) {
+            $.confirm({
+                title: '确认彻底删除资源？',
+                content: '请确认彻底删除此条资源？ 彻底删除后再也无法恢复！ 请谨慎操作！！！',
+                buttons: {
+                    confirm: {
+                        text: "警告",
+                        btnClass: 'btn-primary',
+                        keys: ['enter'],
+                        action: function () {
+                            // Ajax请求后台进行更新
+                            $.ajax({
+                                url: "{% url 'del_message' %}",
+                                type: 'GET',
+                                cache: false,
+                                data: {
+                                    message_id: msgId,
+                                },
+                                success: function (data) {
+                                    window.location.reload();
+                                },
+                                error: function (xhr) {
+                                    console.log(xhr);
+                                }
+                            });
+                        },
+                    },
+                    cancel: {
+                        text: "取消",
+                        keys: ['esc'],
+                        action: function () {
+
                         },
                     }
                 }

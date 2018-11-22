@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 from .models import CustMessage, UserProfile
 from .forms import LoginForm, MessageModelForm as MessageForm, SearchForm
+from manager.forms import ManagerLoginForm
 
 
 # Create your views here.
@@ -39,9 +40,9 @@ def login(request):
 
 # 超级用户跳转到超级用户管理页面
 def forward_superuser(request):
-    login_form = LoginForm()
+    login_form = ManagerLoginForm()
     context = {'login_form': login_form}
-    return render(request, 'login.html', context)
+    return render(request, 'manager/login.html', context)
 
 
 def get_message_common_data(message_list, request):

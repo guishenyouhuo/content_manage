@@ -28,9 +28,13 @@
                             <td>{{ user.user_num }}</td>
                             <td>{{ user.username }}</td>
                             <td><button type="button" class="btn btn-link" onclick="modifyUser({{ user.pk }}, '{{ user.username }}')">修改密码</button></td>
-                            <td><button type="button" class="btn btn-warning">停用</button></td>
-{#                            <button type="button" class="btn btn-success">启用</button>#}
-                            <td><button type="button" class="btn btn-danger">删除</button></td>
+                            {% if user.user_status == 1 %}
+                                <td><button type="button" class="btn btn-warning" onclick="changeUser({{ user.pk }}, '{{ user.username }}', {{ user.user_status }})">停用</button></td>
+                            {% else %}
+                                <td><button type="button" class="btn btn-success" onclick="changeUser({{ user.pk }}, '{{ user.username }}', {{ user.user_status }})">启用</button></td>
+                            {% endif %}
+
+                            <td><button type="button" class="btn btn-danger" onclick="deleteUser({{ user.pk }}, '{{ user.username }}')">删除</button></td>
                         </tr>
                     {% endfor %}
                 </table>
@@ -106,5 +110,96 @@
                 }
             });
         });
+        // 修改用户状态
+        function changeUser(userId, userName, status) {
+            var btnText = '';
+            if (status === 1) {
+                btnText = '停用';
+            } else {
+                btnText = '启用';
+            }
+            $.confirm({
+                title: '确认' + btnText,
+                content: '确认' + btnText + '用户：' + userName + ' ?',
+                buttons: {
+                    confirm: {
+                        text: "确认",
+                        btnClass: 'btn-primary',
+                        keys: ['enter'],
+                        action: function () {
+                            $.ajax({
+                                url: "{% url 'change_user' %}",
+                                type: 'GET',
+                                data: {
+                                    user_id: userId,
+                                    user_status: status
+                                },
+                                cache: false,
+                                success: function (data) {
+                                    console.log(data);
+                                    if (data['status'] === 'SUCCESS') {
+                                        window.location.reload();
+                                    } else {
+                                        $.alert('操作失败！');
+                                    }
+                                },
+                                error: function (xhr) {
+                                    console.log(xhr);
+                                }
+                            });
+                        },
+                    },
+                    cancel: {
+                        text: "取消",
+                        keys: ['esc'],
+                        action: function () {
+
+                        },
+                    }
+                }
+            });
+        }
+        // 删除用户
+        function deleteUser(userId, userName) {
+            $.confirm({
+                title: '确认删除',
+                content: '确认删除用户：' + userName + ' ?',
+                buttons: {
+                    confirm: {
+                        text: "确认",
+                        btnClass: 'btn-primary',
+                        keys: ['enter'],
+                        action: function () {
+                            $.ajax({
+                                url: "{% url 'delete_user' %}",
+                                type: 'GET',
+                                data: {
+                                    user_id: userId
+                                },
+                                cache: false,
+                                success: function (data) {
+                                    console.log(data);
+                                    if (data['status'] === 'SUCCESS') {
+                                        window.location.reload();
+                                    } else {
+                                        $.alert('操作失败！');
+                                    }
+                                },
+                                error: function (xhr) {
+                                    console.log(xhr);
+                                }
+                            });
+                        },
+                    },
+                    cancel: {
+                        text: "取消",
+                        keys: ['esc'],
+                        action: function () {
+
+                        },
+                    }
+                }
+            });
+        }
     </script>
 {% endblock %}

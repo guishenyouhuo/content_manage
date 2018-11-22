@@ -8,6 +8,8 @@ from django.contrib.auth.models import User
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     user_num = models.CharField(max_length=20, unique=True, verbose_name='用户编号')
+    # 1：启用 ；0：停用
+    user_status = models.IntegerField(default=1, verbose_name='用户状态')
 
     def __str__(self):
         return self.user.username
@@ -21,7 +23,16 @@ def get_user_num(self):
         return ''
 
 
+def get_user_status(self):
+    if UserProfile.objects.filter(user=self).exists():
+        profile = UserProfile.objects.get(user=self)
+        return profile.user_status
+    else:
+        return ''
+
+
 User.user_num = get_user_num
+User.user_status = get_user_status
 
 
 # 留言资源模型
@@ -44,7 +55,7 @@ class CustMessage(models.Model):
     visit_record = models.TextField(null=True, blank=True, default=None)
     # 下次回访日期
     next_visit_date = models.DateField(null=True, blank=True, default=None)
-    # 留言类型
+    # 留言类型(0:删除, 1:正常, 2:意向)
     type = models.IntegerField()
     # 来源标记
     source_tag = models.CharField(max_length=50, null=True, blank=True, default=None)

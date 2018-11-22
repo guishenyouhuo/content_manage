@@ -1,0 +1,81 @@
+{% extends 'message/message.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    客户意向管理|管理员留言管理页面
+{% endblock %}
+
+{% block  navheader %}
+    <ul class="nav navbar-nav">
+        <li class="active">
+            <a href="{% url 'manager' %}">后台管理</a >
+        </li>
+    </ul>
+{% endblock %}
+
+{% block left_content %}
+    <div class="hidden-xs col-sm-3 col-md-2 col-lg-2">
+        <div class="panel panel-default">
+            <div class="panel-heading">招商用户管理</div>
+            <div class="panel-body">
+                <ul class="message-tasks">
+                    <li>
+                        <a href="{% url 'add_user' %}">添加招商用户</a >
+                    </li>
+                    <li>
+                        <a href="{% url 'user_list' %}">查看招商用户</a >
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">留言管理</div>
+            <div class="panel-body">
+                <ul>
+                    <li>
+                        <a href="{% url 'show_all' %}">查看全部留言</a >
+                    </li>
+                    <li>
+                        <a href="#">按分配人查看留言</a >
+                    </li>
+                    <li>
+                        <a href="#">查看已做客户</a >
+                    </li>
+                    <li>
+                        <a href="#">按分配人查看已做</a >
+                    </li>
+                    <li>
+                        <a href="#">手动添加留言</a >
+                    </li>
+                    <li>
+                        <a href="#">批量导入留言</a >
+                    </li>
+                    <li>
+                        <a href="#">留言搜索</a >
+                    </li>
+                    <li>
+                        <a href="{% url 'show_trush' %}">回收站</a >
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">配置管理</div>
+            <div class="panel-body">
+                <ul>
+                    <li>
+                        <a href=" ">留言分配设置</a >
+                    </li>
+                    <li>
+                        <a href="#">来源配置</a >
+                    </li>
+                    <li>
+                        <a href="#">Excel模板配置</a >
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+         

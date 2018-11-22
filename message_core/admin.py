@@ -20,12 +20,17 @@ class UserProfileInline(admin.StackedInline):
 
 class UserAdmin(BaseUserAdmin):
     inlines = (UserProfileInline,)
-    list_display = ('username', 'user_num', 'email', 'is_staff', 'is_active', 'is_superuser')
+    list_display = ('username', 'user_num', 'user_status', 'email', 'is_staff', 'is_active', 'is_superuser')
 
     def user_num(self, obj):
         return obj.userprofile.user_num
 
     user_num.short_description = '编号'
+
+    def user_status(self, obj):
+        return obj.userprofile.user_status
+
+    user_status.short_description = '状态'
 
 
 admin.site.unregister(User)
