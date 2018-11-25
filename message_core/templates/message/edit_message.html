@@ -8,3 +8,16 @@
 {% block block_list_title %}修改留言信息{% endblock %}
 
 {% block submit_btn %}修改{% endblock %}
+
+{% block script_extends %}
+    <script type="text/javascript">
+        $(function () {
+            $('#msg_src_tag').removeClass('div-hide');
+        });
+        //执行一个laydate实例
+        laydate.render({
+            elem: '#datepicker', //指定元素
+            format: 'yyyy/MM/dd'
+        });
+    </script>
+{% endblock %}

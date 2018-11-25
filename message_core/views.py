@@ -79,7 +79,7 @@ def show_message(request):
     user = request.user
     if user.is_superuser:
         return forward_superuser(request)
-    message_list = CustMessage.objects.filter(follow_user=user.userprofile).exclude(type=0)
+    message_list = CustMessage.objects.filter(follow_user=user.userprofile).exclude(message_status=0)
     context = get_message_common_data(message_list, request)
     context['message_title'] = '我的全部资源'
     context['no_message_tip'] = '暂无留言内容'
@@ -104,7 +104,7 @@ def finished_message(request):
     user = request.user
     if user.is_superuser:
         forward_superuser(request)
-    message_list = CustMessage.objects.filter(follow_user=user.userprofile, type=3)
+    message_list = CustMessage.objects.filter(follow_user=user.userprofile, type=3).exclude(message_status=0)
     context = get_message_common_data(message_list, request)
     context['message_title'] = '我的已完成留言'
     context['no_message_tip'] = '暂无已完成留言'
@@ -116,7 +116,7 @@ def intent_message(request):
     user = request.user
     if user.is_superuser:
         forward_superuser(request)
-    message_list = CustMessage.objects.filter(follow_user=user.userprofile, type=2)
+    message_list = CustMessage.objects.filter(follow_user=user.userprofile, type=2).exclude(message_status=0)
     context = get_message_common_data(message_list, request)
     context['message_title'] = '我的意向组'
     context['no_message_tip'] = '暂无意向留言'
@@ -144,11 +144,11 @@ def message_task(request, day):
         delta = datetime.timedelta(days=day)
         task_date = task_date + delta
         message_list = CustMessage.objects.filter(follow_user=user.userprofile, next_visit_date=task_date).exclude(
-            type=0)
+            message_status=0)
     else:
         task_name = '历史'
         message_list = CustMessage.objects.filter(follow_user=user.userprofile, next_visit_date__lt=task_date).exclude(
-            type=0)
+            message_status=0)
     context = get_message_common_data(message_list, request)
     context['message_title'] = '我的' + task_name + '任务'
     context['no_message_tip'] = '暂无' + task_name + '任务'
@@ -157,13 +157,11 @@ def message_task(request, day):
 
 def build_message(cust_message, message_form):
     cust_message.cust_name = message_form.cleaned_data['cust_name']
-    cust_message.cust_mobile = message_form.cleaned_data['cust_mobile']
     cust_message.cust_address = message_form.cleaned_data['cust_address']
     cust_message.message = message_form.cleaned_data['message']
     cust_message.visit_record = message_form.cleaned_data['visit_record']
     cust_message.next_visit_date = message_form.cleaned_data['next_visit_date']
-    cust_message.type = 1
-    # cust_message.source_tag = message_form.cleaned_data['s']
+    cust_message.source_tag = message_form.cleaned_data['source_tag']
 
 
 def search_message(request):
@@ -179,10 +177,7 @@ def search_message(request):
             context['message_title'] = '留言搜索结果'
             context['no_message_tip'] = '未搜索到留言'
             return render(request, 'message/message.html', context)
-        else:
-            pass
-    else:
-        search_form = SearchForm()
+    search_form = SearchForm()
     context['search_form'] = search_form
     return render(request, 'message/search_message.html', context)
 
@@ -195,6 +190,10 @@ def add_message(request):
         if message_form.is_valid():
             cust_message = CustMessage()
             build_message(cust_message, message_form)
+            # 添加默认为正常留言
+            cust_message.type = 1
+            # 添加才需设置手机号
+            cust_message.cust_mobile = message_form.cleaned_data['cust_mobile']
             if not user.is_superuser:
                 cust_message.follow_user = user.userprofile
             else:
@@ -203,6 +202,7 @@ def add_message(request):
             return redirect(reverse('show_message'), args=[])
     else:
         message_form = MessageForm()
+        message_form.fields['next_visit_date'].widget.attrs['class'] = 'div-hide'
     context['message_form'] = message_form
     return render(request, 'message/add_message.html', context)
 
@@ -233,10 +233,10 @@ def intent_change(request):
     object_id = request.GET.get('object_id')
     is_intented = request.GET.get('is_intented')
     message = CustMessage.objects.get(pk=object_id)
-    if is_intented == 'true':
-        message.type = 1
-    else:
+    if is_intented != 'true':
         message.type = 2
+    else:
+        message.type = 1
     message.save()
     data = {'status': 'SUCCESS'}
     return JsonResponse(data)

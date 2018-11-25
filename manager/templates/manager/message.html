@@ -2,7 +2,7 @@
 {% load staticfiles %}
 
 {% block title %}
-    客户意向管理|管理员留言管理页面
+    客户意向管理|管理员留言管理
 {% endblock %}
 
 {% block  navheader %}
@@ -36,22 +36,19 @@
                         <a href="{% url 'show_all' %}">查看全部留言</a >
                     </li>
                     <li>
-                        <a href="#">按分配人查看留言</a >
+                        <a href="{% url 'all_complete' %}">查看已做客户</a >
                     </li>
                     <li>
-                        <a href="#">查看已做客户</a >
+                        <a href="{% url 'show_by_user' %}">按分配人查看</a >
                     </li>
                     <li>
-                        <a href="#">按分配人查看已做</a >
-                    </li>
-                    <li>
-                        <a href="#">手动添加留言</a >
+                        <a href="{% url 'dispatch_message' %}">手动添加留言</a >
                     </li>
                     <li>
                         <a href="#">批量导入留言</a >
                     </li>
                     <li>
-                        <a href="#">留言搜索</a >
+                        <a href="{% url 'manager_search' %}">留言搜索</a >
                     </li>
                     <li>
                         <a href="{% url 'show_trush' %}">回收站</a >
@@ -64,7 +61,7 @@
             <div class="panel-body">
                 <ul>
                     <li>
-                        <a href=" ">留言分配设置</a >
+                        <a href="#">留言分配设置</a >
                     </li>
                     <li>
                         <a href="#">来源配置</a >

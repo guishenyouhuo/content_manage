@@ -21,7 +21,7 @@ def get_intent_operate(obj):
 
 @register.simple_tag()
 def get_del_operate(obj):
-    if obj.type == 0:
+    if obj.message_status == 0:
         return '恢复资源'
     else:
         return '删除资源'
@@ -29,7 +29,23 @@ def get_del_operate(obj):
 
 @register.simple_tag()
 def get_del_icon(obj):
-    if obj.type == 0:
+    if obj.message_status == 0:
         return 'glyphicon-refresh'
     else:
         return 'glyphicon-trash'
+
+
+@register.simple_tag()
+def get_complete_operate(obj):
+    if obj.type == 3:
+        return '未完成'
+    else:
+        return '完成'
+
+
+@register.simple_tag()
+def get_complete_status(obj):
+    if obj.type == 3:
+        return 'active'
+    else:
+        return ''

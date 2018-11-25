@@ -76,35 +76,49 @@
                                 <div class="message">
                                     <div class="message-header">
                                         <div class="message-link">
-                                            <a href="{% url 'edit_message' message.pk %}">
+                                            {% if user == message.follow_user.user %}
+                                                <a href="{% url 'edit_message' message.pk %}">
+                                                    {{ message.get_cust_name }}
+                                                    ({{ message.cust_mobile }})
+                                                </a>
+                                            {% else %}
                                                 {{ message.get_cust_name }}
                                                 ({{ message.cust_mobile }})
-                                            </a>
-                                        </div>
-                                        <div class="message-operate">
-                                            {% if not user.is_superuser %}
-                                                <div class="intent" onclick="intentChange(this, {{ message.pk }})">
-                                                    <span class="glyphicon glyphicon-star {% get_message_status message %}"></span>
-                                                    <span class="intent-operate-text" >{% get_intent_operate message %}</span>
-                                                </div>
-                                            {% else %}
-                                                <div class="intent" onclick="deleteMessage(this, {{ message.pk }}, {{ message.type }})">
-                                                    <span class="glyphicon {% get_del_icon message %}"></span>
-                                                    <span>{% get_del_operate message %}</span>
-                                                </div>
-                                                {% if message.type == 0 %}
-                                                    |
-                                                    <div class="intent" onclick="emptyMessage(this, {{ message.pk }})">
-                                                        <span class="glyphicon glyphicon-trash"></span>
-                                                        <span>彻底删除</span>
-                                                    </div>
-                                                {% endif %}
                                             {% endif %}
-                                            <div class="trans-to" onclick="transToOther(this, {{ message.pk }}, {{ message.follow_user.user.pk }})">
-                                                <span class="glyphicon glyphicon-hand-right"></span>
-                                                <span class="trans-to-text">转移给...</span>
-                                            </div>
+
                                         </div>
+                                        {% if user.is_superuser or user == message.follow_user.user %}
+                                            <div class="message-operate">
+                                                {% if not user.is_superuser %}
+                                                    {% if message.type == 1 or message.type == 2%}
+                                                        <div class="intent" onclick="intentChange(this, {{ message.pk }})">
+                                                            <span class="glyphicon glyphicon-star {% get_message_status message %}"></span>
+                                                            <span class="intent-operate-text">{% get_intent_operate message %}</span>
+                                                        </div>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <div class="intent"
+                                                         onclick="deleteMessage(this, {{ message.pk }}, {{ message.message_status }})">
+                                                        <span class="glyphicon {% get_del_icon message %}"></span>
+                                                        <span>{% get_del_operate message %}</span>
+                                                    </div>
+                                                    {% if message.message_status == 0 %}
+                                                        |
+                                                        <div class="intent" onclick="emptyMessage(this, {{ message.pk }})">
+                                                            <span class="glyphicon glyphicon-trash"></span>
+                                                            <span>彻底删除</span>
+                                                        </div>
+                                                    {% endif %}
+                                                {% endif %}
+                                                {% if message.type == 1 %}
+                                                    <div class="trans-to"
+                                                         onclick="transToOther(this, {{ message.pk }}, {{ message.follow_user.user.pk }})">
+                                                        <span class="glyphicon glyphicon-hand-right"></span>
+                                                        <span class="trans-to-text">转移给...</span>
+                                                    </div>
+                                                 {% endif %}
+                                            </div>
+                                        {% endif %}
                                         <div class="next-visit">
                                             <span class="glyphicon glyphicon-calendar"></span>
                                             {{ message.get_visit_date }}
@@ -125,6 +139,13 @@
                                             {{ message.last_follow_user.user.username }}
                                         {% endif %}
                                         &nbsp;&nbsp;&nbsp;
+                                        {% if not user.is_superuser %}
+                                            <div class="intent next-visit" onclick="intentComplete(this, {{ message.pk }})">
+                                                <span class="glyphicon glyphicon-ok {% get_complete_status message %}"></span>
+                                                <span class="complete-operate-text">{% get_complete_operate message %}</span>
+                                            </div>
+                                        {% endif %}
+
                                         <div class="cust-message">
                                             <span style="font-size: 14px; font-weight: bold;">客户留言：</span>
                                             {{ message.get_message }}
@@ -222,13 +243,14 @@
                                     console.log(data);
                                     if (data['status'] === 'SUCCESS') {
                                         // 更新意向状态，更新操作文字
+                                        /*
                                         var element = $(obj.getElementsByClassName('glyphicon-star'));
                                         var operateText = $(obj.getElementsByClassName('intent-operate-text'));
                                         if (isIntented) {
                                             element.removeClass('active');
                                             operateText.text('添加意向');
                                             isIntented = false;
-                                            var title = '{{ message_title }}';
+                                            var title = "message_title";
                                             if (title === '我的意向组') {
                                                 // 如果是意向组页面，需要将移除意向组的那条隐藏
                                                 var messagesBody = $(obj).parents('.panel-body')[0];
@@ -243,6 +265,8 @@
                                             operateText.text('移除意向');
                                             isIntented = true;
                                         }
+                                        */
+                                        window.location.reload();
                                     } else {
                                         $.alert('操作失败！');
                                     }
@@ -266,6 +290,7 @@
 
         // 用户列表全局变量
         var userList = new Array();
+
         function transToOther(eleObj, msgId, curUser) {
             if (eleObj.getElementsByClassName('trans-select').length !== 0) {
                 return;
@@ -275,8 +300,7 @@
                     url: "{% url 'get_user_list' %}",
                     type: 'GET',
                     cache: false,
-                    data: {
-                    },
+                    data: {},
                     success: function (data) {
                         userList = data['user_list'];
                         doTransUser(eleObj, msgId, curUser);
@@ -289,6 +313,7 @@
                 doTransUser(eleObj, msgId, curUser);
             }
         }
+
         function doTransUser(eleObj, msgId, curUser) {
             if (userList.length === 0) {
                 return;
@@ -298,7 +323,7 @@
             $(textElem).addClass('div-hide');
 
             var selectHtml = '<select class="trans-select" name="trans-select" onChange="selectTransUser(this ,&quot;' + msgId + '&quot;)";>' +
-                             '<option value="---">--请选择--</option>';
+                '<option value="---">--请选择--</option>';
             for (var i = 0; i < userList.length; i++) {
                 var user = userList[i];
                 if (user['id'] === curUser) {
@@ -309,6 +334,7 @@
             selectHtml += '</select>';
             $(eleObj).append(selectHtml);
         }
+
         function selectTransUser(selObj, msgId) {
             var selectVal = $(".trans-select").val();
             if (selectVal === '---') {
@@ -363,6 +389,7 @@
                 }
             });
         }
+
         //删除资源(移入回收站)
         function deleteMessage(cliObj, msgId, messageStatus) {
             var titleText = '确认删除留言？';
@@ -408,6 +435,7 @@
                 }
             });
         }
+
         // 从回收站删除（永久删除！）
         function emptyMessage(cliObj, msgId) {
             $.confirm({
@@ -429,6 +457,54 @@
                                 },
                                 success: function (data) {
                                     window.location.reload();
+                                },
+                                error: function (xhr) {
+                                    console.log(xhr);
+                                }
+                            });
+                        },
+                    },
+                    cancel: {
+                        text: "取消",
+                        keys: ['esc'],
+                        action: function () {
+
+                        },
+                    }
+                }
+            });
+        }
+
+        function intentComplete(obj, object_id) {
+            var isCompleted = obj.getElementsByClassName('active').length !== 0;
+            var title = '提示';
+            var content = '确认将该客户标记为已完成？';
+            if (isCompleted) {
+                content = '确认将该客户恢复至未完成？';
+            }
+            $.confirm({
+                title: title,
+                content: content,
+                buttons: {
+                    confirm: {
+                        text: "确认",
+                        btnClass: 'btn-primary',
+                        keys: ['enter'],
+                        action: function () {
+                            $.ajax({
+                                url: "{% url 'complete_change' %}",
+                                type: 'GET',
+                                data: {
+                                    object_id: object_id,
+                                    is_completed: isCompleted
+                                },
+                                cache: false,
+                                success: function (data) {
+                                    if (data['status'] === 'SUCCESS') {
+                                        window.location.reload();
+                                    } else {
+                                        $.alert('操作失败！');
+                                    }
                                 },
                                 error: function (xhr) {
                                     console.log(xhr);

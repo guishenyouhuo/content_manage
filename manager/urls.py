@@ -13,5 +13,12 @@ urlpatterns = [
     path('change_status', views.change_status, name='change_status'),
     path('del_message', views.del_message, name='del_message'),
     path('show_trush', views.show_trush, name='show_trush'),
+    path('show_by_user', views.show_by_user, name='show_by_user'),
+    path('user_message/<int:user_pk>', views.show_message_by_user, name='show_message_by_user'),
+    path('all_complete', views.show_complete, name='all_complete'),
+    path('user_complete/<int:user_pk>', views.show_complete_by_user, name='user_complete'),
+    path('complete_change', views.complete_change, name='complete_change'),
+    path('dispatch_message', views.dispatch_message, name='dispatch_message'),
+    path('manager_search', views.search_message, name='manager_search'),
 
 ]

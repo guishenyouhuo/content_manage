@@ -55,8 +55,12 @@ class CustMessage(models.Model):
     visit_record = models.TextField(null=True, blank=True, default=None)
     # 下次回访日期
     next_visit_date = models.DateField(null=True, blank=True, default=None)
-    # 留言类型(0:删除, 1:正常, 2:意向)
-    type = models.IntegerField()
+    # 留言类型(1:正常, 2:意向, 3:完成)
+    type = models.IntegerField(default=1)
+    # 记录上次留言类型，用户状态恢复
+    last_type = models.IntegerField(default=1)
+    # 留言状态（1：正常，0：逻辑删除）
+    message_status = models.IntegerField(default=1)
     # 来源标记
     source_tag = models.CharField(max_length=50, null=True, blank=True, default=None)
     # 创建时间

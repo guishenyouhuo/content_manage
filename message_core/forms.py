@@ -47,13 +47,14 @@ class SearchForm(forms.Form):
 class MessageModelForm(forms.ModelForm):
     class Meta:
         model = CustMessage
-        fields = ['cust_name', 'cust_mobile', 'cust_address', 'message', 'visit_record', 'next_visit_date']
+        fields = ['cust_name', 'cust_mobile', 'cust_address', 'message', 'visit_record', 'source_tag', 'next_visit_date']
         labels = {
             'cust_name': '客户姓名',
             'cust_mobile': '客户电话',
             'cust_address': '客户地址',
             'message': '客户留言',
             'visit_record': '回访记录',
+            'source_tag': '留言来源',
             'next_visit_date': '下次回访日期',
         }
         widgets = {
@@ -68,6 +69,9 @@ class MessageModelForm(forms.ModelForm):
             ),
             'message': forms.Textarea(attrs={'cols': 70, 'rows': 5}),
             'visit_record': CKEditorWidget(config_name='message_ckeditor'),
+            'source_tag': forms.TextInput(
+                attrs={'class': 'form-control', 'placeholder': '请输入留言来源'}
+            ),
             'next_visit_date': forms.DateInput(attrs={'id': 'datepicker'}),
         }
         error_messages = {

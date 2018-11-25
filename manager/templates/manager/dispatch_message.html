@@ -1,19 +1,18 @@
-{% extends 'message/message.html' %}
+{% extends 'manager/message.html' %}
 {% load staticfiles %}
 
 {% block title %}
-    客户意向管理|添加留言
+    客户意向管理|分配留言
 {% endblock %}
-
-{% block nav_message_active %}active{% endblock %}
 
 {% block header_extends %}
     <link rel="stylesheet" href="{% static 'message/css/add_message.css' %}">
     <link rel="stylesheet" href="{% static 'message/css/message.css' %}">
+    <link rel="stylesheet" href="{% static 'manager/css/bootstrap-select.min.css' %}">
+    <script type="text/javascript" src="{% static 'manager/js/bootstrap-select.min.js' %}"></script>
     <script type="text/javascript" src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
     <script type="text/javascript" src="{% static "ckeditor/ckeditor-init.js" %}"></script>
     <script type="text/javascript" src="{% static "ckeditor/ckeditor/ckeditor.js" %}"></script>
-    <script type="text/javascript" src="{% static "laydate/laydate.js" %}"></script>
 {% endblock %}
 
 {% block main_content %}
@@ -49,9 +48,14 @@
                         <label for="{{ message_form.visit_record.id_for_label }}">{{ message_form.visit_record.label }}</label>
                         {{ message_form.visit_record }}{{ message_form.visit_record.errors }}
                     </div>
-                    <div class="form_field div-hide" id="msg_src_tag">
-                        <label for="{{ message_form.next_visit_date.id_for_label }}">{{ message_form.next_visit_date.label }}</label>
-                        {{ message_form.next_visit_date }}{{ message_form.next_visit_date.errors }}
+                    <div class="form_field" id="follow_user">
+                        <label for="id_follow_user}">分配给: </label>
+                        <select class="selectpicker" name="follow_user_id" id="sel_follow_user">
+                            <option value="auto">自动分配</option>
+                            {% for user in user_list %}
+                                <option value="{{ user.pk }}">{{ user.username }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <button type="submit" class="btn btn-primary pull-right">
                         {% block submit_btn %}
@@ -62,4 +66,7 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block script_extends %}
 {% endblock %}
