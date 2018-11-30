@@ -1,0 +1,64 @@
+{% extends 'manager/message.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    客户意向管理|Excel模板配置
+{% endblock %}
+
+{% block header_extends %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'message/css/add_message.css' %}">
+    <link rel="stylesheet" href="{% static 'message/css/message.css' %}">
+    <link rel="stylesheet" href="{% static 'manager/css/bootstrap-select.min.css' %}">
+    <script type="text/javascript" src="{% static 'manager/js/bootstrap-select.min.js' %}"></script>
+{% endblock %}
+
+{% block main_content %}
+    <div class="col-xs-12 col-sm-9 col-md-10 col-lg-10">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                {% block block_list_title %}Excel模板配置{% endblock %}
+            </div>
+            <div class="panel-body">
+                <form class="form_body" action="" method="post" autocomplete="off">
+                    {% csrf_token %}
+                    <div class="form_field common_field">
+                        <label class="common_label" for="{{ template_form.template_key.id_for_label }}">{{ template_form.template_key.label }}：</label>
+                        <input class="input-large" name="{{ template_form.template_key.name}}" placeholder="请输入模板名称" type="text" style="height:30px;"/>
+                        &nbsp;&nbsp;<span class="text-danger">{{ template_form.template_key.errors.as_text }}</span>
+                    </div>
+                    <div class="form_field common_field">
+                        <label class="common_label" for="id_has_firstline">是否包含第一行：</label>
+                        <input name="has_first_line" type="checkbox" checked="checked" style="width: 20px;"/>
+                        &nbsp;&nbsp;<span class="text-danger">{{ template_form.has_firstline.errors.as_text }}</span>
+                    </div>
+                    <div class="form_field common_field">
+                        <label class="common_label" for="{{ template_form.col_username.id_for_label }}">{{ template_form.col_username.label }}：</label>
+                        <input class="input-large" name="{{ template_form.col_username.name}}" placeholder="请输入用户姓名列" type="text" style="height:30px;"/>
+                        &nbsp;&nbsp;<span class="text-danger">{{ template_form.col_username.errors.as_text }}</span>
+                    </div>
+                    <div class="form_field common_field">
+                        <label class="common_label" for="{{ template_form.col_mobilephone.id_for_label }}">{{ template_form.col_mobilephone.label }}：</label>
+                        <input class="input-large" name="{{ template_form.col_mobilephone.name}}" placeholder="请输入用户电话列" type="text" style="height:30px;"/>
+                        &nbsp;&nbsp;<span class="text-danger">{{ template_form.col_mobilephone.errors.as_text }}</span>
+                    </div>
+                    <div class="form_field common_field">
+                        <label class="common_label" for="{{ template_form.col_address.id_for_label }}">{{ template_form.col_address.label }}：</label>
+                        <input class="input-large" name="{{ template_form.col_address.name}}" placeholder="请输入用户地址列" type="text" style="height:30px;"/>
+                        &nbsp;&nbsp;<span class="text-danger">{{ template_form.col_address.errors.as_text }}</span>
+                    </div>
+                    <div class="form_field common_field">
+                        <label class="common_label" for="{{ template_form.col_message.id_for_label }}">{{ template_form.col_message.label }}：</label>
+                        <input class="input-large" name="{{ template_form.col_message.name}}" placeholder="请输入用户留言列" type="text" style="height:30px;"/>
+                        &nbsp;&nbsp;<span class="text-danger">{{ template_form.col_message.errors.as_text }}</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary pull-right">添加</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script_extends %}
+
+{% endblock %}

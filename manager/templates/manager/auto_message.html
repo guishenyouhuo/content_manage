@@ -1,0 +1,44 @@
+{% extends 'manager/message.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    客户意向管理|留言分配设置
+{% endblock %}
+
+{% block header_extends %}
+    <link rel="stylesheet" href="{% static 'message/css/message.css' %}">
+    <link rel="stylesheet" href="{% static 'manager/css/bootstrap-select.min.css' %}">
+    <script type="text/javascript" src="{% static 'manager/js/bootstrap-select.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
+{% endblock %}
+
+{% block main_content %}
+    <div class="col-xs-12 col-sm-9 col-md-10 col-lg-10">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                {% block block_list_title %}留言分配设置{% endblock %}
+            </div>
+            <div class="panel-body">
+                <form class="form_body" action="" method="post" autocomplete="off">
+                    {% csrf_token %}
+                    <div class="form_field" id="follow_user" align="center">
+                        <label for="id_cur_user}">选择当前分配用户: </label>
+                        <select class="selectpicker" name="cur_user_id" id="sel_cur_user">
+                            {% for user in user_list %}
+                                {% if auto_config is not None and user.pk == auto_config.cur_user.user.pk %}
+                                    <option value="{{ user.pk }}" selected>{{ user.username }}</option>
+                                {% else %}
+                                    <option value="{{ user.pk }}">{{ user.username }}</option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>&nbsp;
+                        <button type="submit" class="btn btn-primary">确定</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script_extends %}
+{% endblock %}

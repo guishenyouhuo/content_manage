@@ -1,0 +1,47 @@
+{% extends 'manager/message.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    客户意向管理|来源配置
+{% endblock %}
+
+{% block header_extends %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'message/css/add_message.css' %}">
+    <link rel="stylesheet" href="{% static 'message/css/message.css' %}">
+    <link rel="stylesheet" href="{% static 'manager/css/bootstrap-select.min.css' %}">
+    <script type="text/javascript" src="{% static 'manager/js/bootstrap-select.min.js' %}"></script>
+{% endblock %}
+
+{% block main_content %}
+    <div class="col-xs-12 col-sm-9 col-md-10 col-lg-10">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                {% block block_list_title %}来源配置{% endblock %}
+            </div>
+            <div class="panel-body">
+                <form class="form_body" action="" method="post" autocomplete="off">
+                    {% csrf_token %}
+                    <div class="form_field common_field">
+                        <label class="common_label" for="{{ tag_form.tag_name.id_for_label }}">{{ tag_form.tag_name.label }}：</label>
+                        <input class="input-large" name="{{ tag_form.tag_name.name}}" placeholder="请输入来源名称" type="text" style="height:30px;"/>
+                        &nbsp;&nbsp;<span class="text-danger">{{ tag_form.tag_name.errors.as_text }}</span>
+                    </div>
+                    <div class="form_field common_field">
+                        <label class="common_label" for="id_msg_template">模板选择：</label>
+                        <select class="selectpicker" name="msg_template_key" id="sel_template_key">
+                            {% for template in template_list %}
+                                <option value="{{ template.pk }}">{{ template.template_key }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary pull-right">添加</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script_extends %}
+
+{% endblock %}

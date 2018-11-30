@@ -1,0 +1,64 @@
+{% extends 'manager/message.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    客户意向管理|导入留言
+{% endblock %}
+
+{% block header_extends %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'message/css/add_message.css' %}">
+    <link rel="stylesheet" href="{% static 'message/css/message.css' %}">
+    <link rel="stylesheet" href="{% static 'manager/css/bootstrap-select.min.css' %}">
+    <script type="text/javascript" src="{% static 'manager/js/bootstrap-select.min.js' %}"></script>
+{% endblock %}
+
+{% block main_content %}
+    <div class="col-xs-12 col-sm-9 col-md-10 col-lg-10">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                {% block block_list_title %}批量导入留言{% endblock %}
+            </div>
+            <div class="panel-body">
+                <form class="form_body" action="" method="post" autocomplete="off">
+                    {% csrf_token %}
+                    <div class="form_field common_field" id="import_file">
+                        <label class="common_label" for="id_import_file}">选择文件: </label>
+                        <input id="lefile" type="file" style="display:none"/>
+                        <input id="importFile" placeholder="请选择97-2003的Excel文档" class="input-large" type="text"
+                               style="height:30px;"/>
+                        <a class="btn btn-default" onclick="$('input[id=lefile]').click();">浏览...</a>
+                    </div>
+
+                    <div class="form_field common_field" id="source_tag">
+                        <label class="common_label" for="id_source_tag">选择来源：</label>
+                        <select class="selectpicker" name="follow_user_id" id="sel_follow_user">
+                            {% for source_tag in source_tag_list %}
+                                <option value="{{ source_tag.pk }}">{{ source_tag.tag_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form_field common_field" id="follow_user">
+                        <label class="common_label" for="id_follow_user">分配给：</label>
+                        <select class="selectpicker" name="follow_user_id" id="sel_follow_user">
+                            <option value="auto">自动分配</option>
+                            {% for user in user_list %}
+                                <option value="{{ user.pk }}">{{ user.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary pull-right">导入</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script_extends %}
+    <script type="text/javascript">
+        $('input[id=lefile]').change(function () {
+            $('#importFile').val($(this).val());
+        });
+    </script>
+{% endblock %}
