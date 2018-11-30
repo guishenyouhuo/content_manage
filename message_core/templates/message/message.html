@@ -139,7 +139,7 @@
                                             {{ message.last_follow_user.user.username }}
                                         {% endif %}
                                         &nbsp;&nbsp;&nbsp;
-                                        {% if not user.is_superuser %}
+                                        {% if not user.is_superuser and user == message.follow_user.user %}
                                             <div class="intent next-visit" onclick="intentComplete(this, {{ message.pk }})">
                                                 <span class="glyphicon glyphicon-ok {% get_complete_status message %}"></span>
                                                 <span class="complete-operate-text">{% get_complete_operate message %}</span>

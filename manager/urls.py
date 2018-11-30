@@ -20,5 +20,9 @@ urlpatterns = [
     path('complete_change', views.complete_change, name='complete_change'),
     path('dispatch_message', views.dispatch_message, name='dispatch_message'),
     path('manager_search', views.search_message, name='manager_search'),
+    path('auto_message', views.auto_message, name='auto_message'),
+    path('import_message', views.import_message, name='import_message'),
+    path('add_template', views.add_template, name='add_template'),
+    path('add_tag', views.add_tag, name='add_tag'),
 
 ]

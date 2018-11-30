@@ -24,17 +24,14 @@
             <div class="panel-body">
                 <form class="form_body" action="" method="post" autocomplete="off">
                     {% csrf_token %}
-                    {% for field in search_form %}
-                        <div class="form_field">
-                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }}
-                        </div><p class="text-danger">{{ field.errors.as_text }}</p>
-                    {% endfor %}
-                    <button type="submit" class="btn btn-primary pull-right" style="margin-top: -44px; margin-right: 200px;">
-                        {% block submit_btn %}
-                            搜索
-                        {% endblock %}
-                    </button>
+                    <div class="col-md-7">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="请输入客户姓名或手机号" name="search_text">
+                            <span class="input-group-btn">
+                                <button class="btn btn-primary" type="submit">搜索</button>
+                            </span>
+                        </div><!-- /input-group -->
+                    </div><!-- /.col-lg-7 -->
                 </form>
             </div>
         </div>

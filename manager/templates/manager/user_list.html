@@ -4,8 +4,8 @@
     客户意向管理|招商用户管理
 {% endblock %}
 {% block header_extends %}
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <link rel="stylesheet" href="{% static 'manager/css/add_user.css' %}">
-    <link rel="stylesheet" href="{% static 'manager/css/user_list.css' %}">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
 {% endblock %}
 {% block main_content %}
@@ -55,11 +55,11 @@
                     <div class="modal-body">
                         {% csrf_token %}
                         <p>
-                            <label class="modify_user_label" for="user_pwd_new">新密码：</label>
+                            <label class="common_label" for="user_pwd_new">新密码：</label>
                             <input type="password" id="user_pwd_new" name="user_pwd_new" align="left"/>
                         </p>
                         <p>
-                            <label class="modify_user_label" for="user_pwd_confirm">确认密码：</label>
+                            <label class="common_label" for="user_pwd_confirm">确认密码：</label>
                             <input type="password" id="user_pwd_confirm" name="user_pwd_confirm" align="left"/>
                         </p>
                         <input type="hidden" id="modify_user_id" name="modify_user_id" />

@@ -2,6 +2,7 @@ from django import forms
 from django.contrib import auth
 from django.contrib.auth.models import User
 from message_core.models import UserProfile
+from .models import MsgTemplate, TagMapping
 
 
 class ManagerLoginForm(forms.Form):
@@ -95,3 +96,63 @@ class UserForm(forms.ModelForm):
         if password is None:
             raise forms.ValidationError('未填写用户密码')
         return password
+
+
+class MsgTemplateForm(forms.ModelForm):
+    class Meta:
+        model = MsgTemplate
+        fields = ['template_key', 'col_username', 'col_mobilephone', 'col_address', 'col_message']
+        labels = {
+            'template_key': 'Excel模板名称',
+            'col_username': '客户姓名所在列',
+            'col_mobilephone': '客户电话所在列',
+            'col_address': '客户地址所在列',
+            'col_message': '客户留言所在列',
+        }
+
+        error_messages = {
+            'template_key': {
+                'required': '模板名称不能为空',
+            },
+            'col_mobilephone': {
+                'required': '客户电话列不能为空',
+            }
+        }
+
+    def clean_template_key(self):
+        template_key = self.cleaned_data['template_key']
+        if template_key is None:
+            raise forms.ValidationError('未填写Excel模板名称')
+        if self.instance.pk is None and MsgTemplate.objects.filter(template_key=template_key).exists():
+            raise forms.ValidationError('该模板名称已存在')
+        return template_key
+
+    def clean_col_mobilephone(self):
+        col_mobliephone = self.cleaned_data['col_mobilephone']
+        if col_mobliephone is None:
+            raise forms.ValidationError('未填写客户电话所在列')
+        return col_mobliephone
+
+
+class TagMappingForm(forms.ModelForm):
+    class Meta:
+        model = TagMapping
+        fields = ['tag_name']
+        labels = {
+            'tag_name': '来源名称',
+        }
+
+        error_messages = {
+            'tag_name': {
+                'required': '来源名称不能为空',
+            }
+        }
+
+    def clean_tag_name(self):
+        tag_name = self.cleaned_data['tag_name']
+        if tag_name is None:
+            raise forms.ValidationError('未填来源名称')
+        if self.instance.pk is None and TagMapping.objects.filter(tag_name=tag_name).exists():
+            raise forms.ValidationError('该来源已存在')
+        return tag_name
+

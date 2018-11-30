@@ -6,6 +6,7 @@
 {% block header_extends %}
     <link rel="stylesheet" href="{% static 'manager/css/add_user.css' %}">
     <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
 {% endblock %}
 {% block main_content %}
     <div class="col-xs-12 col-sm-9 col-md-10 col-lg-10">
@@ -16,23 +17,22 @@
             <div class="panel-body">
                 <form class="add_user_form" action="" method="post" autocomplete="off">
                     {% csrf_token %}
-                    {% for field in profile_form %}
-                        <div class="form_field">
-                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }} <p class="text-danger">{{ field.errors.as_text }}</p>
-                        </div>
-                    {% endfor %}
-                    {% for field in user_form %}
-                        <div class="form_field">
-                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                            {{ field }} <p class="text-danger">{{ field.errors.as_text }}</p>
-                        </div>
-                    {% endfor %}
-                    <button type="submit" class="btn btn-primary pull-left">
-                        {% block submit_btn %}
-                            添加
-                        {% endblock %}
-                    </button>
+                    <div class="form_field common_field">
+                        <label class="common_label" for="{{ profile_form.user_num.id_for_label }}">{{ profile_form.user_num.label }}：</label>
+                        <input class="input-large" name="{{ profile_form.user_num.name}}" placeholder="请输入用户编号" type="text" style="height:30px;"/>
+                        &nbsp;&nbsp;<span class="text-danger">{{ profile_form.user_num.errors.as_text }}</span>
+                    </div>
+                    <div class="form_field common_field">
+                        <label class="common_label" for="{{ user_form.username.id_for_label }}">{{ user_form.username.label }}：</label>
+                        <input class="input-large" name="{{ user_form.username.name}}" placeholder="请输入用户姓名" type="text" style="height:30px;"/>
+                        &nbsp;&nbsp;<span class="text-danger">{{ user_form.username.errors.as_text }}</span>
+                    </div>
+                    <div class="form_field common_field">
+                        <label class="common_label" for="{{ user_form.password.id_for_label }}">{{ user_form.password.label }}：</label>
+                        <input class="input-large" name="{{ user_form.password.name}}" placeholder="请输入用户密码" type="text" style="height:30px;"/>
+                        &nbsp;&nbsp;<span class="text-danger">{{ user_form.password.errors.as_text }}</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary pull-right">添加</button>
                 </form>
             </div>
         </div>

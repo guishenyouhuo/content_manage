@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 from .models import CustMessage, UserProfile
-from .forms import LoginForm, MessageModelForm as MessageForm, SearchForm
+from .forms import LoginForm, MessageModelForm as MessageForm
 from manager.forms import ManagerLoginForm
 
 
@@ -167,18 +167,14 @@ def build_message(cust_message, message_form):
 def search_message(request):
     context = {}
     if request.method == 'POST':
-        search_form = SearchForm(request.POST)
-        if search_form.is_valid():
-            search_text = search_form.cleaned_data['search_text']
-            message_list = CustMessage.objects.filter(cust_mobile=search_text)
-            if not message_list:
-                message_list = CustMessage.objects.filter(cust_name=search_text)
-            context = get_message_common_data(message_list, request)
-            context['message_title'] = '留言搜索结果'
-            context['no_message_tip'] = '未搜索到留言'
-            return render(request, 'message/message.html', context)
-    search_form = SearchForm()
-    context['search_form'] = search_form
+        search_text = request.POST['search_text']
+        message_list = CustMessage.objects.filter(cust_mobile=search_text)
+        if not message_list:
+            message_list = CustMessage.objects.filter(cust_name=search_text)
+        context = get_message_common_data(message_list, request)
+        context['message_title'] = '留言搜索结果'
+        context['no_message_tip'] = '未搜索到留言'
+        return render(request, 'message/message.html', context)
     return render(request, 'message/search_message.html', context)
 
 
@@ -243,7 +239,7 @@ def intent_change(request):
 
 
 def get_user_list(request):
-    users = User.objects.filter(is_active=True, is_superuser=False)
+    users = User.objects.filter(is_active=True, is_superuser=False, userprofile__user_status=1)
     user_list = []
     for user in users:
         user_list.append(model_to_dict(user))

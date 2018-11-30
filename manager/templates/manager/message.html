@@ -45,7 +45,7 @@
                         <a href="{% url 'dispatch_message' %}">手动添加留言</a >
                     </li>
                     <li>
-                        <a href="#">批量导入留言</a >
+                        <a href="{% url 'import_message' %}">批量导入留言</a >
                     </li>
                     <li>
                         <a href="{% url 'manager_search' %}">留言搜索</a >
@@ -61,13 +61,13 @@
             <div class="panel-body">
                 <ul>
                     <li>
-                        <a href="#">留言分配设置</a >
+                        <a href="{% url 'auto_message' %}">自动分配设置</a >
                     </li>
                     <li>
-                        <a href="#">来源配置</a >
+                        <a href="{% url 'add_tag' %}">来源配置</a >
                     </li>
                     <li>
-                        <a href="#">Excel模板配置</a >
+                        <a href="{% url 'add_template' %}">Excel模板配置</a >
                     </li>
                 </ul>
             </div>

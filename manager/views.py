@@ -4,11 +4,12 @@ from django.contrib import auth
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.http import JsonResponse
+from .models import AutoMessage, MsgTemplate, TagMapping
 from message_core.models import UserProfile
 from message_core.views import get_message_common_data, forward_superuser, build_message
 from message_core.models import CustMessage
-from message_core.forms import MessageModelForm as MessageForm, SearchForm
-from .forms import ManagerLoginForm, UserForm, ProfileForm
+from message_core.forms import MessageModelForm as MessageForm
+from .forms import ManagerLoginForm, UserForm, ProfileForm, MsgTemplateForm, TagMappingForm
 
 
 # Create your views here.
@@ -175,7 +176,7 @@ def show_trush(request):
 
 
 def show_by_user(request):
-    user_list = User.objects.filter(is_active=True, is_superuser=False)
+    user_list = User.objects.filter(is_active=True, is_superuser=False, userprofile__user_status=1)
     context = {'user_list': user_list}
     return render(request, 'manager/message_by_user.html', context)
 
@@ -201,7 +202,25 @@ def dispatch_message(request):
     if request.method == 'POST':
         message_form = MessageForm(request.POST, user=request.user)
         if message_form.is_valid():
-            user_id = int(request.POST['follow_user_id'])
+            auto_config = AutoMessage()
+            follow_user_id = request.POST['follow_user_id']
+            if follow_user_id == 'auto':
+                auto_config = AutoMessage.objects.all()[0]
+                user_list = User.objects.filter(is_active=True, is_superuser=False, userprofile__user_status=1)
+                index = 0
+                while index < user_list.count():
+                    if user_list[index].pk == auto_config.cur_user.user_id:
+                        break
+                    index += 1
+                index += 1
+                # 默认取第一个(包含当前是最后一个或者没有当前用户)
+                user_id = user_list[0].pk
+                # 如果还在列表范围内，取index位置用户
+                if index < user_list.count():
+                    user_id = user_list[index].pk
+            else:
+                user_id = int(request.POST['follow_user_id'])
+
             user_profile = UserProfile.objects.get(user_id=user_id)
             cust_message = CustMessage()
             build_message(cust_message, message_form)
@@ -211,10 +230,14 @@ def dispatch_message(request):
             cust_message.cust_mobile = message_form.cleaned_data['cust_mobile']
             cust_message.follow_user = user_profile
             cust_message.save()
+            # 如果是自动分配，需要更新当前用户
+            if follow_user_id == 'auto':
+                auto_config.cur_user = user_profile
+                auto_config.save()
             return redirect(reverse('show_all'), args=[])
     else:
         message_form = MessageForm()
-        user_list = User.objects.filter(is_active=True, is_superuser=False)
+        user_list = User.objects.filter(is_active=True, is_superuser=False, userprofile__user_status=1)
         context['message_form'] = message_form
         context['user_list'] = user_list
     return render(request, 'manager/dispatch_message.html', context)
@@ -223,16 +246,82 @@ def dispatch_message(request):
 def search_message(request):
     context = {}
     if request.method == 'POST':
-        search_form = SearchForm(request.POST)
-        if search_form.is_valid():
-            search_text = search_form.cleaned_data['search_text']
-            message_list = CustMessage.objects.filter(cust_mobile=search_text)
-            if not message_list:
-                message_list = CustMessage.objects.filter(cust_name=search_text)
-            context = get_message_common_data(message_list, request)
-            context['message_title'] = '留言搜索结果'
-            context['no_message_tip'] = '未搜索到留言'
-            return render(request, 'manager/message.html', context)
-    search_form = SearchForm()
-    context['search_form'] = search_form
+        search_text = request.POST['search_text']
+        message_list = CustMessage.objects.filter(cust_mobile=search_text)
+        if not message_list:
+            message_list = CustMessage.objects.filter(cust_name=search_text)
+        context = get_message_common_data(message_list, request)
+        context['message_title'] = '留言搜索结果'
+        context['no_message_tip'] = '未搜索到留言'
+        return render(request, 'manager/message.html', context)
     return render(request, 'manager/search_message.html', context)
+
+
+def auto_message(request):
+    context = {}
+    auto_config = None
+    if AutoMessage.objects.exists():
+        auto_config = AutoMessage.objects.all()[0]
+        context['auto_config'] = auto_config
+    user_list = User.objects.filter(is_active=True, is_superuser=False, userprofile__user_status=1)
+    context['user_list'] = user_list
+    if request.method == 'POST':
+        sel_user_id = int(request.POST['cur_user_id'])
+        sel_user = UserProfile.objects.get(user_id=sel_user_id)
+        if auto_config is None:
+            auto_config = AutoMessage()
+        auto_config.cur_user = sel_user
+        auto_config.save()
+        context['auto_config'] = auto_config
+    return render(request, 'manager/auto_message.html', context)
+
+
+def import_message(request):
+    context = {}
+    user_list = User.objects.filter(is_active=True, is_superuser=False, userprofile__user_status=1)
+    tag_list = TagMapping.objects.all()
+    context['user_list'] = user_list
+    context['source_tag_list'] = tag_list
+    return render(request, 'manager/import_message.html', context)
+
+
+def add_template(request):
+    context = {}
+    if request.method == 'POST':
+        template_form = MsgTemplateForm(request.POST)
+        if template_form.is_valid():
+            template = MsgTemplate()
+            template.template_key = template_form.cleaned_data['template_key']
+            has_first_line = request.POST.get('has_first_line')
+            if has_first_line is None:
+                template.has_firstline = False
+            template.col_mobilephone = template_form.cleaned_data['col_mobilephone']
+            template.col_username = template_form.cleaned_data['col_username']
+            template.col_address = template_form.cleaned_data['col_address']
+            template.col_message = template_form.cleaned_data['col_message']
+            template.save()
+            return redirect(reverse('add_tag'), args=[])
+    else:
+        template_form = MsgTemplateForm()
+    context['template_form'] = template_form
+    return render(request, 'manager/add_template.html', context)
+
+
+def add_tag(request):
+    context = {}
+    if request.method == 'POST':
+        tag_form = TagMappingForm(request.POST)
+        if tag_form.is_valid():
+            tag_map = TagMapping()
+            tag_map.tag_name = tag_form.cleaned_data['tag_name']
+            ref_template_id = request.POST.get('msg_template_key')
+            tag_template = MsgTemplate.objects.get(pk=ref_template_id)
+            tag_map.ref_template = tag_template
+            tag_map.save()
+            return redirect(reverse('import_message'), args=[])
+    else:
+        tag_form = TagMappingForm()
+    template_list = MsgTemplate.objects.all()
+    context['template_list'] = template_list
+    context['tag_form'] = tag_form
+    return render(request, 'manager/add_tag.html', context)
