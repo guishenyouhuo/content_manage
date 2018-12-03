@@ -1,3 +1,6 @@
+import xlrd
+from datetime import datetime
+from xlrd import xldate_as_tuple
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib import auth
@@ -9,7 +12,7 @@ from message_core.models import UserProfile
 from message_core.views import get_message_common_data, forward_superuser, build_message
 from message_core.models import CustMessage
 from message_core.forms import MessageModelForm as MessageForm
-from .forms import ManagerLoginForm, UserForm, ProfileForm, MsgTemplateForm, TagMappingForm
+from .forms import ManagerLoginForm, UserForm, ProfileForm, MsgTemplateForm, TagMappingForm, ImportForm
 
 
 # Create your views here.
@@ -276,13 +279,108 @@ def auto_message(request):
     return render(request, 'manager/auto_message.html', context)
 
 
+@transaction.atomic
 def import_message(request):
     context = {}
     user_list = User.objects.filter(is_active=True, is_superuser=False, userprofile__user_status=1)
+    if request.method == 'POST':
+        import_form = ImportForm(request.POST, request.FILES)
+        if import_form.is_valid():
+            excel_file = request.FILES['excel_file']
+            sel_source = import_form.cleaned_data['sel_source']
+            dispatch_user = import_form.cleaned_data['dispatch_user']
+            tag_template = MsgTemplate.objects.get(ref_tag__tag_name=sel_source)
+            # 开始解析上传的excel表格
+            wb = xlrd.open_workbook(filename=None, file_contents=excel_file.read())
+            table = wb.sheets()[0]
+            # 分配数据
+            first_row = 1
+            if not tag_template.has_firstline:
+                first_row = 2
+            # 首先建立映射关系
+            user_dict = {}
+            # 用户列表大小
+            user_count = user_list.count()
+            # 确定用户列表偏移量
+            user_shift = 0
+            # 批量保存信息列表
+            batch_message_list = []
+            auto_config = AutoMessage.objects.all()[0]
+            last_dispatch_user = auto_config.cur_user
+            while user_shift < user_count:
+                if user_list[user_shift].pk == auto_config.cur_user.user_id:
+                    break
+                user_shift += 1
+            for i in range(first_row, table.nrows):
+                cust_message = CustMessage()
+                # 根据配置的映射字段找到excel中具体列的值
+                if tag_template.col_username is not None and tag_template.col_username.isalpha():
+                    cust_name_idx = ord(tag_template.col_username.upper()) - ord('A')
+                    cust_name_type = table.cell_type(i, cust_name_idx)
+                    cust_message.cust_name = get_cell_value(cust_name_type, table.cell_value(i, cust_name_idx))
+                if tag_template.col_mobilephone is not None and tag_template.col_mobilephone.isalpha():
+                    mobilephone_idx = ord(tag_template.col_mobilephone.upper()) - ord('A')
+                    mobilephone_type = table.cell_type(i, mobilephone_idx)
+                    cust_message.cust_mobile = get_cell_value(mobilephone_type, table.cell_value(i, mobilephone_idx))
+                if tag_template.col_address is not None and tag_template.col_address.isalpha():
+                    cust_address_idx = ord(tag_template.col_address.upper()) - ord('A')
+                    address_type = table.cell_type(i, cust_address_idx)
+                    cust_message.cust_address = get_cell_value(address_type, table.cell_value(i, cust_address_idx))
+                if tag_template.col_message is not None and tag_template.col_message.isalpha():
+                    cust_message_idx = ord(tag_template.col_message.upper()) - ord('A')
+                    message_type = table.cell_type(i, cust_message_idx)
+                    cust_message.cust_address = get_cell_value(message_type, table.cell_value(i, cust_message_idx))
+
+                cust_message.source_tag = sel_source
+                # 分配人设置
+                if dispatch_user == 'auto':
+                    # 自动分配的情况下，用户索引为当前留言索引加上用户偏移量，模上用户列表长度
+                    user_index = (i + user_shift) % user_count
+                    user = user_list[user_index]
+                    follow_user = user_dict.get(user.pk)
+                    # 如果映射字典中没有，则进行查询
+                    if follow_user is None:
+                        follow_user = UserProfile.objects.get(user_id=user.pk)
+                        user_dict[user.pk] = follow_user
+                else:
+                    follow_user = UserProfile.objects.get(user_id=int(dispatch_user))
+                # 记录当前处理分配的用户
+                last_dispatch_user = follow_user
+                cust_message.follow_user = follow_user
+                batch_message_list.append(cust_message)
+                # 满1000保存一次数据库
+                if len(batch_message_list) >= 1000:
+                    CustMessage.objects.bulk_create(batch_message_list)
+                    batch_message_list.clear()
+            # 保存最后存留的一部分数据
+            if len(batch_message_list) > 0:
+                CustMessage.objects.bulk_create(batch_message_list)
+                batch_message_list.clear()
+            # 自动分配的情况 还需要更新自动分配配置表
+            if dispatch_user == 'auto':
+                auto_config.cur_user = last_dispatch_user
+                auto_config.save()
+            return redirect(reverse('show_all'), args=[])
+    else:
+        import_form = ImportForm()
     tag_list = TagMapping.objects.all()
-    context['user_list'] = user_list
     context['source_tag_list'] = tag_list
+    context['user_list'] = user_list
+    context['import_form'] = import_form
     return render(request, 'manager/import_message.html', context)
+
+
+def get_cell_value(cell_type, cell_value):
+    # 如果是整形
+    if cell_type == 2 and cell_value % 1 == 0:
+        cell_value = int(cell_value)
+    elif cell_type == 3:
+        # 转成datetime对象
+        date = datetime(*xldate_as_tuple(cell_value, 0))
+        cell_value = date.strftime('%Y/%d/%m %H:%M:%S')
+    elif cell_type == 4:
+        cell_value = True if cell_value == 1 else False
+    return cell_value
 
 
 def add_template(request):

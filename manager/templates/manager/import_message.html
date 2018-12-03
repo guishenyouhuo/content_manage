@@ -20,33 +20,39 @@
                 {% block block_list_title %}批量导入留言{% endblock %}
             </div>
             <div class="panel-body">
-                <form class="form_body" action="" method="post" autocomplete="off">
+                <form class="form_body" enctype="multipart/form-data" action="" method="post" autocomplete="off">
                     {% csrf_token %}
                     <div class="form_field common_field" id="import_file">
-                        <label class="common_label" for="id_import_file}">选择文件: </label>
-                        <input id="lefile" type="file" style="display:none"/>
+                        <label class="common_label"
+                               for="{{ import_form.excel_file.id_for_label }}">{{ import_form.excel_file.label }}: </label>
+                        <input id="lefile" type="file" name="{{ import_form.excel_file.name }}" style="display:none"/>
                         <input id="importFile" placeholder="请选择97-2003的Excel文档" class="input-large" type="text"
                                style="height:30px;"/>
                         <a class="btn btn-default" onclick="$('input[id=lefile]').click();">浏览...</a>
+                        <span class="text-danger">{{ import_form.excel_file.errors.as_text }}</span>
                     </div>
 
                     <div class="form_field common_field" id="source_tag">
-                        <label class="common_label" for="id_source_tag">选择来源：</label>
-                        <select class="selectpicker" name="follow_user_id" id="sel_follow_user">
+                        <label class="common_label"
+                               for="{{ import_form.sel_source.id_for_label }}">{{ import_form.sel_source.label }}：</label>
+                        <select class="selectpicker" name="{{ import_form.sel_source.name }}" id="sel_follow_user">
                             {% for source_tag in source_tag_list %}
-                                <option value="{{ source_tag.pk }}">{{ source_tag.tag_name }}</option>
+                                <option value="{{ source_tag.tag_name }}">{{ source_tag.tag_name }}</option>
                             {% endfor %}
                         </select>
+                        <span class="text-danger">{{ import_form.sel_source.errors.as_text }}</span>
                     </div>
 
                     <div class="form_field common_field" id="follow_user">
-                        <label class="common_label" for="id_follow_user">分配给：</label>
-                        <select class="selectpicker" name="follow_user_id" id="sel_follow_user">
+                        <label class="common_label"
+                               for="{{ import_form.dispatch_user.id_for_label }}">{{ import_form.dispatch_user.label }}：</label>
+                        <select class="selectpicker" name="{{ import_form.dispatch_user.name }}" id="sel_follow_user">
                             <option value="auto">自动分配</option>
                             {% for user in user_list %}
                                 <option value="{{ user.pk }}">{{ user.username }}</option>
                             {% endfor %}
                         </select>
+                        <span class="text-danger">{{ import_form.dispatch_user.errors.as_text }}</span>
                     </div>
                     <button type="submit" class="btn btn-primary pull-right">导入</button>
                 </form>

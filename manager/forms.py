@@ -131,7 +131,30 @@ class MsgTemplateForm(forms.ModelForm):
         col_mobliephone = self.cleaned_data['col_mobilephone']
         if col_mobliephone is None:
             raise forms.ValidationError('未填写客户电话所在列')
+        if len(col_mobliephone) != 1 or not col_mobliephone.isalpha():
+            raise forms.ValidationError('客户电话所在列输入不合法（请输入字母）')
         return col_mobliephone
+
+    def clean_col_username(self):
+        col_username = self.cleaned_data['col_username']
+        if col_username is not None:
+            if len(col_username) != 1 or not col_username.isalpha():
+                raise forms.ValidationError('客户姓名所在列输入不合法（请输入字母）')
+        return col_username
+
+    def clean_col_address(self):
+        col_address = self.cleaned_data['col_address']
+        if col_address is not None:
+            if len(col_address) != 1 or not col_address.isalpha():
+                raise forms.ValidationError('客户地址所在列输入不合法（请输入字母）')
+        return col_address
+
+    def clean_col_message(self):
+        col_message = self.cleaned_data['col_message']
+        if col_message is not None:
+            if len(col_message) != 1 or not col_message.isalpha():
+                raise forms.ValidationError('客户留言所在列输入不合法（请输入字母）')
+        return col_message
 
 
 class TagMappingForm(forms.ModelForm):
@@ -156,3 +179,28 @@ class TagMappingForm(forms.ModelForm):
             raise forms.ValidationError('该来源已存在')
         return tag_name
 
+
+class ImportForm(forms.Form):
+    excel_file = forms.FileField(label='选择文件')
+    sel_source = forms.CharField(label='选择来源')
+    dispatch_user = forms.CharField(label='分配给')
+
+    def clean_excel_file(self):
+        excel_file = self.cleaned_data['excel_file']
+        if excel_file is None:
+            raise forms.ValidationError('未选择导入Excel文件！')
+        if not excel_file.name.endswith('.xls'):
+            raise forms.ValidationError('只能够导入xls格式的文件！')
+        return excel_file
+
+    def clean_sel_source(self):
+        sel_source = self.cleaned_data['sel_source']
+        if sel_source is None:
+            raise forms.ValidationError('未选择来源！')
+        return sel_source
+
+    def clean_dispatch_user(self):
+        dispatch_user = self.cleaned_data['dispatch_user']
+        if dispatch_user is None:
+            raise forms.ValidationError('未选择分配用户！')
+        return dispatch_user
