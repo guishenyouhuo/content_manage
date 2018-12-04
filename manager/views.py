@@ -1,4 +1,5 @@
 import xlrd
+import re
 from datetime import datetime
 from xlrd import xldate_as_tuple
 from django.shortcuts import render, redirect
@@ -311,17 +312,40 @@ def import_message(request):
                 if user_list[user_shift].pk == auto_config.cur_user.user_id:
                     break
                 user_shift += 1
+            # 有效计数（中间或有跳过数据）
+            cur_index = first_row
+            # 失败列表
+            fail_list = []
             for i in range(first_row, table.nrows):
                 cust_message = CustMessage()
                 # 根据配置的映射字段找到excel中具体列的值
+                if tag_template.col_mobilephone is not None and tag_template.col_mobilephone.isalpha():
+                    mobilephone_idx = ord(tag_template.col_mobilephone.upper()) - ord('A')
+                    mobilephone_type = table.cell_type(i, mobilephone_idx)
+                    # 字符串类型需要做处理
+                    if mobilephone_type == 1:
+                        mobilephone = table.cell_value(i, mobilephone_idx)
+                        # 去掉非数字字符
+                        mobilephone = re.sub("\D", "", mobilephone)
+                        # 转整形（主要用于去掉首位0）
+                        mobilephone = int(mobilephone) if len(mobilephone) > 0 else 0
+                    else:
+                        mobilephone = get_cell_value(mobilephone_type, table.cell_value(i, mobilephone_idx))
+                    # 不满足手机号格式
+                    if not re.search('^1[0-9]{10}$', str(mobilephone)):
+                        fail_tuple = (str(table.cell_value(i, mobilephone_idx)), "格式不合法！")
+                        fail_list.append(fail_tuple)
+                        continue
+                    # 检查是否存在
+                    if CustMessage.objects.filter(cust_mobile=str(mobilephone)).exists():
+                        fail_tuple = (str(mobilephone), "重复号码！")
+                        fail_list.append(fail_tuple)
+                        continue
+                    cust_message.cust_mobile = str(mobilephone)
                 if tag_template.col_username is not None and tag_template.col_username.isalpha():
                     cust_name_idx = ord(tag_template.col_username.upper()) - ord('A')
                     cust_name_type = table.cell_type(i, cust_name_idx)
                     cust_message.cust_name = get_cell_value(cust_name_type, table.cell_value(i, cust_name_idx))
-                if tag_template.col_mobilephone is not None and tag_template.col_mobilephone.isalpha():
-                    mobilephone_idx = ord(tag_template.col_mobilephone.upper()) - ord('A')
-                    mobilephone_type = table.cell_type(i, mobilephone_idx)
-                    cust_message.cust_mobile = get_cell_value(mobilephone_type, table.cell_value(i, mobilephone_idx))
                 if tag_template.col_address is not None and tag_template.col_address.isalpha():
                     cust_address_idx = ord(tag_template.col_address.upper()) - ord('A')
                     address_type = table.cell_type(i, cust_address_idx)
@@ -335,7 +359,7 @@ def import_message(request):
                 # 分配人设置
                 if dispatch_user == 'auto':
                     # 自动分配的情况下，用户索引为当前留言索引加上用户偏移量，模上用户列表长度
-                    user_index = (i + user_shift) % user_count
+                    user_index = (cur_index + user_shift) % user_count
                     user = user_list[user_index]
                     follow_user = user_dict.get(user.pk)
                     # 如果映射字典中没有，则进行查询
@@ -352,6 +376,7 @@ def import_message(request):
                 if len(batch_message_list) >= 1000:
                     CustMessage.objects.bulk_create(batch_message_list)
                     batch_message_list.clear()
+                cur_index += 1
             # 保存最后存留的一部分数据
             if len(batch_message_list) > 0:
                 CustMessage.objects.bulk_create(batch_message_list)
@@ -360,6 +385,9 @@ def import_message(request):
             if dispatch_user == 'auto':
                 auto_config.cur_user = last_dispatch_user
                 auto_config.save()
+            if len(fail_list) > 0:
+                context['fail_list'] = fail_list
+                return render(request, 'manager/import_fail.html', context)
             return redirect(reverse('show_all'), args=[])
     else:
         import_form = ImportForm()

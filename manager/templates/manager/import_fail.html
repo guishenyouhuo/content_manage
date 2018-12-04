@@ -1,0 +1,25 @@
+{% extends 'manager/message.html' %}
+{% load staticfiles %}
+
+{% block title %}
+    客户意向管理|导入失败列表
+{% endblock %}
+
+{% block main_content %}
+    <div class="col-xs-12 col-sm-9 col-md-10 col-lg-10">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                {% block block_list_title %}导入失败信息{% endblock %}
+            </div>
+            <div class="panel-body">
+                {% for fail_tuple in fail_list %}
+                    导入失败号码：<span style="color: red">{{ fail_tuple.0 }}</span>, 失败原因：<span style="color: red">{{ fail_tuple.1 }}</span><br>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script_extends %}
+
+{% endblock %}
