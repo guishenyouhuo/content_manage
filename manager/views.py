@@ -203,6 +203,7 @@ def complete_change(request):
 
 def dispatch_message(request):
     context = {}
+    user_list = UserProfile.objects.filter(user__is_active=True, user__is_superuser=False, user_status=1)
     if request.method == 'POST':
         message_form = MessageForm(request.POST, user=request.user)
         if message_form.is_valid():
@@ -210,22 +211,15 @@ def dispatch_message(request):
             follow_user_id = request.POST['follow_user_id']
             if follow_user_id == 'auto':
                 auto_config = AutoMessage.objects.all()[0]
-                user_list = User.objects.filter(is_active=True, is_superuser=False, userprofile__user_status=1)
                 index = 0
-                while index < user_list.count():
-                    if user_list[index].pk == auto_config.cur_user.user_id:
-                        break
+                while index < user_list.count() and user_list[index].pk != auto_config.cur_user.pk:
                     index += 1
                 index += 1
-                # 默认取第一个(包含当前是最后一个或者没有当前用户)
-                user_id = user_list[0].pk
-                # 如果还在列表范围内，取index位置用户
-                if index < user_list.count():
-                    user_id = user_list[index].pk
+                # 默认取第一个(包含当前是最后一个或者没有当前用户), 如果还在列表范围内，取index位置用户
+                user_index = index if index < user_list.count() else 0
+                user_profile = user_list[user_index]
             else:
-                user_id = int(request.POST['follow_user_id'])
-
-            user_profile = UserProfile.objects.get(user_id=user_id)
+                user_profile = [user for user in user_list if user.pk == int(request.POST['follow_user_id'])][0]
             cust_message = CustMessage()
             build_message(cust_message, message_form)
             # 添加默认为正常留言
@@ -241,7 +235,6 @@ def dispatch_message(request):
             return redirect(reverse('show_all'), args=[])
     else:
         message_form = MessageForm()
-        user_list = User.objects.filter(is_active=True, is_superuser=False, userprofile__user_status=1)
         context['message_form'] = message_form
         context['user_list'] = user_list
     return render(request, 'manager/dispatch_message.html', context)
@@ -267,14 +260,14 @@ def auto_message(request):
     if AutoMessage.objects.exists():
         auto_config = AutoMessage.objects.all()[0]
         context['auto_config'] = auto_config
-    user_list = User.objects.filter(is_active=True, is_superuser=False, userprofile__user_status=1)
+    user_list = UserProfile.objects.filter(user__is_active=True, user__is_superuser=False, user_status=1)
     context['user_list'] = user_list
     if request.method == 'POST':
         sel_user_id = int(request.POST['cur_user_id'])
-        sel_user = UserProfile.objects.get(user_id=sel_user_id)
+        sel_user = [user for user in user_list if user.pk == sel_user_id]
         if auto_config is None:
             auto_config = AutoMessage()
-        auto_config.cur_user = sel_user
+        auto_config.cur_user = sel_user[0]
         auto_config.save()
         context['auto_config'] = auto_config
     return render(request, 'manager/auto_message.html', context)
@@ -283,7 +276,7 @@ def auto_message(request):
 @transaction.atomic
 def import_message(request):
     context = {}
-    user_list = User.objects.filter(is_active=True, is_superuser=False, userprofile__user_status=1)
+    user_list = UserProfile.objects.filter(user__is_active=True, user__is_superuser=False, user_status=1)
     if request.method == 'POST':
         import_form = ImportForm(request.POST, request.FILES)
         if import_form.is_valid():
@@ -298,8 +291,6 @@ def import_message(request):
             first_row = 1
             if not tag_template.has_firstline:
                 first_row = 2
-            # 首先建立映射关系
-            user_dict = {}
             # 用户列表大小
             user_count = user_list.count()
             # 确定用户列表偏移量
@@ -309,13 +300,15 @@ def import_message(request):
             auto_config = AutoMessage.objects.all()[0]
             last_dispatch_user = auto_config.cur_user
             while user_shift < user_count:
-                if user_list[user_shift].pk == auto_config.cur_user.user_id:
+                if user_list[user_shift].pk == auto_config.cur_user.pk:
                     break
                 user_shift += 1
             # 有效计数（中间或有跳过数据）
             cur_index = first_row
             # 失败列表
             fail_list = []
+            # 构建用户字典
+            user_dict = {user.pk: user for user in user_list}
             for i in range(first_row, table.nrows):
                 cust_message = CustMessage()
                 # 根据配置的映射字段找到excel中具体列的值
@@ -353,21 +346,16 @@ def import_message(request):
                 if tag_template.col_message is not None and tag_template.col_message.isalpha():
                     cust_message_idx = ord(tag_template.col_message.upper()) - ord('A')
                     message_type = table.cell_type(i, cust_message_idx)
-                    cust_message.cust_address = get_cell_value(message_type, table.cell_value(i, cust_message_idx))
+                    cust_message.message = get_cell_value(message_type, table.cell_value(i, cust_message_idx))
 
                 cust_message.source_tag = sel_source
                 # 分配人设置
                 if dispatch_user == 'auto':
                     # 自动分配的情况下，用户索引为当前留言索引加上用户偏移量，模上用户列表长度
                     user_index = (cur_index + user_shift) % user_count
-                    user = user_list[user_index]
-                    follow_user = user_dict.get(user.pk)
-                    # 如果映射字典中没有，则进行查询
-                    if follow_user is None:
-                        follow_user = UserProfile.objects.get(user_id=user.pk)
-                        user_dict[user.pk] = follow_user
+                    follow_user = user_list[user_index]
                 else:
-                    follow_user = UserProfile.objects.get(user_id=int(dispatch_user))
+                    follow_user = user_dict[int(dispatch_user)]
                 # 记录当前处理分配的用户
                 last_dispatch_user = follow_user
                 cust_message.follow_user = follow_user

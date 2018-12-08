@@ -25,10 +25,10 @@
                         <label for="id_cur_user}">选择当前分配用户: </label>
                         <select class="selectpicker" name="cur_user_id" id="sel_cur_user">
                             {% for user in user_list %}
-                                {% if auto_config is not None and user.pk == auto_config.cur_user.user.pk %}
-                                    <option value="{{ user.pk }}" selected>{{ user.username }}</option>
+                                {% if auto_config is not None and user.pk == auto_config.cur_user.pk %}
+                                    <option value="{{ user.pk }}" selected>{{ user.user.username }}</option>
                                 {% else %}
-                                    <option value="{{ user.pk }}">{{ user.username }}</option>
+                                    <option value="{{ user.pk }}">{{ user.user.username }}</option>
                                 {% endif %}
                             {% endfor %}
                         </select>&nbsp;

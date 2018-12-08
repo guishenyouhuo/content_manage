@@ -53,7 +53,7 @@
                         <select class="selectpicker" name="follow_user_id" id="sel_follow_user">
                             <option value="auto">自动分配</option>
                             {% for user in user_list %}
-                                <option value="{{ user.pk }}">{{ user.username }}</option>
+                                <option value="{{ user.pk }}">{{ user.user.username }}</option>
                             {% endfor %}
                         </select>
                     </div>

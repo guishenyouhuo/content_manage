@@ -49,7 +49,7 @@
                         <select class="selectpicker" name="{{ import_form.dispatch_user.name }}" id="sel_follow_user">
                             <option value="auto">自动分配</option>
                             {% for user in user_list %}
-                                <option value="{{ user.pk }}">{{ user.username }}</option>
+                                <option value="{{ user.pk }}">{{ user.user.username }}</option>
                             {% endfor %}
                         </select>
                         <span class="text-danger">{{ import_form.dispatch_user.errors.as_text }}</span>
