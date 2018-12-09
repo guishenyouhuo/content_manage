@@ -91,8 +91,8 @@ def unvisit_message(request):
     user = request.user
     if user.is_superuser:
         forward_superuser(request)
-    message_list = CustMessage.objects.filter(follow_user=user.userprofile, next_visit_date__isnull=True).exclude(
-        type=0)
+    message_list = CustMessage.objects.filter(follow_user=user.userprofile, next_visit_date__isnull=True,
+                                              visit_record__isnull=True).exclude(type=0)
     context = get_message_common_data(message_list, request)
     context['message_title'] = '我的未回访留言'
     context['no_message_tip'] = '暂无未回访留言'
@@ -144,11 +144,11 @@ def message_task(request, day):
         delta = datetime.timedelta(days=day)
         task_date = task_date + delta
         message_list = CustMessage.objects.filter(follow_user=user.userprofile, next_visit_date=task_date).exclude(
-            message_status=0)
+            message_status=0).exclude(type=3)
     else:
         task_name = '历史'
         message_list = CustMessage.objects.filter(follow_user=user.userprofile, next_visit_date__lt=task_date).exclude(
-            message_status=0)
+            message_status=0).exclude(type=3)
     context = get_message_common_data(message_list, request)
     context['message_title'] = '我的' + task_name + '任务'
     context['no_message_tip'] = '暂无' + task_name + '任务'

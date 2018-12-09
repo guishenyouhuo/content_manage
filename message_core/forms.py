@@ -32,7 +32,8 @@ class LoginForm(forms.Form):
 class MessageModelForm(forms.ModelForm):
     class Meta:
         model = CustMessage
-        fields = ['cust_name', 'cust_mobile', 'cust_address', 'message', 'visit_record', 'source_tag', 'next_visit_date']
+        fields = ['cust_name', 'cust_mobile', 'cust_address', 'message', 'visit_record', 'source_tag',
+                  'next_visit_date']
         labels = {
             'cust_name': '客户姓名',
             'cust_mobile': '客户电话',
@@ -89,3 +90,9 @@ class MessageModelForm(forms.ModelForm):
         if self.instance.pk is None and CustMessage.objects.filter(cust_mobile=cust_mobile).exists():
             raise forms.ValidationError('该手机号已存在')
         return cust_mobile
+
+    def clean_visit_record(self):
+        visit_record = self.cleaned_data['visit_record']
+        if len(visit_record.strip()) == 0:
+            visit_record = None
+        return visit_record
