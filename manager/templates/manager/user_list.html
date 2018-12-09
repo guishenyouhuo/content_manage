@@ -162,7 +162,7 @@
         function deleteUser(userId, userName) {
             $.confirm({
                 title: '确认删除',
-                content: '确认删除用户：' + userName + ' ?',
+                content: '确认删除用户：' + userName + ' ? 删除后，用户所属资源将会同时删除，如需保留请先转移！',
                 buttons: {
                     confirm: {
                         text: "确认",

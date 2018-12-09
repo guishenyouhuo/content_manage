@@ -6,7 +6,8 @@ from message_core.models import UserProfile
 
 class AutoMessage(models.Model):
     # 当前分配
-    cur_user = models.ForeignKey(UserProfile, to_field='user_num', related_name='ref_auto_msg', on_delete=models.DO_NOTHING)
+    cur_user = models.ForeignKey(UserProfile, to_field='user_num', related_name='ref_auto_msg',
+                                 on_delete=models.CASCADE)
 
 
 class MsgTemplate(models.Model):
