@@ -96,3 +96,46 @@ class MessageModelForm(forms.ModelForm):
         if len(visit_record.strip()) == 0:
             visit_record = None
         return visit_record
+
+
+class ChangePasswordForm(forms.Form):
+    old_password = forms.CharField(
+        label='原密码',
+        min_length=6,
+        widget=forms.PasswordInput(
+            attrs={'class': 'form-control', 'placeholder': '请输入原密码'}
+        )
+    )
+    new_password = forms.CharField(
+        label='新密码',
+        min_length=6,
+        widget=forms.PasswordInput(
+            attrs={'class': 'form-control', 'placeholder': '请输入新密码'}
+        )
+    )
+    new_password_again = forms.CharField(
+        label='再次输入新密码',
+        min_length=6,
+        widget=forms.PasswordInput(
+            attrs={'class': 'form-control', 'placeholder': '请再次输入新密码'}
+        )
+    )
+
+    def __init__(self, *args, **kwargs):
+        if 'user' in kwargs:
+            self.user = kwargs.pop('user')
+        super(ChangePasswordForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        # 验证两次新密码是否一致
+        new_password = self.cleaned_data.get('new_password', '')
+        new_password_again = self.cleaned_data.get('new_password_again', '')
+        if new_password != new_password_again or new_password == '':
+            raise forms.ValidationError('两次输入的密码不一致')
+
+    def clean_old_password(self):
+        # 验证旧的密码是否正确
+        old_password = self.cleaned_data.get('old_password', '')
+        if not self.user.check_password(old_password):
+            raise forms.ValidationError('原密码错误')
+        return old_password

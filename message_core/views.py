@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 from .models import CustMessage, UserProfile
-from .forms import LoginForm, MessageModelForm as MessageForm
+from .forms import LoginForm, MessageModelForm as MessageForm, ChangePasswordForm
 from manager.forms import ManagerLoginForm
 
 
@@ -258,6 +258,22 @@ def move_message(request):
     message.save()
     data = {'status': 'SUCCESS'}
     return JsonResponse(data)
+
+
+def edit_password(request):
+    if request.method == 'POST':
+        form = ChangePasswordForm(request.POST, user=request.user)
+        if form.is_valid():
+            user = request.user
+            new_password = form.cleaned_data['new_password']
+            user.set_password(new_password)
+            user.save()
+            auth.logout(request)
+            return redirect(reverse('login'), args=[])
+    else:
+        form = ChangePasswordForm()
+    context = {'edit_password_form': form}
+    return render(request, 'message/edit_password.html', context)
 
 
 def logout(request):

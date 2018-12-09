@@ -13,4 +13,20 @@
 
 {% block content %}
     <h3 class="home-content">意向客户管理系统--{{ user.username }}</h3>
+    <div align="center">
+        <ul class="message-tasks">
+            <li>
+                <a href="{% url 'message_task' 0 %}">今日任务</a>
+            </li>
+            <li>
+                <a href="{% url 'message_task' 1 %}">明日任务</a>
+            </li>
+            <li>
+                <a href="{% url 'message_task' 2 %}">后天任务</a>
+            </li>
+            <li>
+                <a href="{% url 'message_task' 3 %}">历史任务</a>
+            </li>
+        </ul>
+    </div>
 {% endblock %}
