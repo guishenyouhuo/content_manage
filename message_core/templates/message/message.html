@@ -77,7 +77,7 @@
                                     <div class="message-header">
                                         <div class="message-link">
                                             {% if user == message.follow_user.user %}
-                                                <a href="{% url 'edit_message' message.pk %}">
+                                                <a href="{% url 'edit_message' message.pk %}?from={{ request.get_full_path }}">
                                                     {{ message.get_cust_name }}
                                                     ({{ message.cust_mobile }})
                                                 </a>

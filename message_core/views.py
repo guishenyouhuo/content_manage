@@ -193,7 +193,7 @@ def add_message(request):
             if not user.is_superuser:
                 cust_message.follow_user = user.userprofile
             else:
-                pass
+                logout(request)
             cust_message.save()
             return redirect(reverse('show_message'), args=[])
     else:
@@ -215,9 +215,9 @@ def edit_message(request, message_id):
             if not user.is_superuser:
                 cust_message.follow_user = user.userprofile
             else:
-                pass
+                logout(request)
             cust_message.save()
-            return redirect(reverse('show_message'), args=[])
+            return redirect(request.GET.get('from', reverse('show_message')), args=[])
     else:
         message_form = MessageForm(instance=CustMessage.objects.get(pk=message_id))
         message_form.fields['cust_mobile'].widget.attrs['readonly'] = True
