@@ -17,7 +17,6 @@ urlpatterns = [
     path('user_message/<int:user_pk>', views.show_message_by_user, name='show_message_by_user'),
     path('all_complete', views.show_complete, name='all_complete'),
     path('user_complete/<int:user_pk>', views.show_complete_by_user, name='user_complete'),
-    path('complete_change', views.complete_change, name='complete_change'),
     path('dispatch_message', views.dispatch_message, name='dispatch_message'),
     path('manager_search', views.search_message, name='manager_search'),
     path('auto_message', views.auto_message, name='auto_message'),

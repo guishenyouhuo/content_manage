@@ -92,7 +92,7 @@ def unvisit_message(request):
     if user.is_superuser:
         forward_superuser(request)
     message_list = CustMessage.objects.filter(follow_user=user.userprofile, next_visit_date__isnull=True,
-                                              visit_record__isnull=True).exclude(type=0)
+                                              visit_record__isnull=True).exclude(message_status=0)
     context = get_message_common_data(message_list, request)
     context['message_title'] = '我的未回访留言'
     context['no_message_tip'] = '暂无未回访留言'
@@ -255,6 +255,22 @@ def move_message(request):
     cur_user = UserProfile.objects.get(user_id=user_id)
     message.follow_user = cur_user
     message.last_follow_user = last_user
+    message.save()
+    data = {'status': 'SUCCESS'}
+    return JsonResponse(data)
+
+
+def complete_change(request):
+    object_id = request.GET.get('object_id')
+    is_completed = request.GET.get('is_completed')
+    message = CustMessage.objects.get(pk=object_id)
+    cur_type = message.type
+    if is_completed != 'true':
+        message.type = 3
+    else:
+        message.type = message.last_type
+    if message.type != cur_type:
+        message.last_type = cur_type
     message.save()
     data = {'status': 'SUCCESS'}
     return JsonResponse(data)

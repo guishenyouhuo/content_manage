@@ -16,4 +16,5 @@ urlpatterns = [
     path('move_message', views.move_message, name='move_message'),
     path('search_message', views.search_message, name='search_message'),
     path('edit_password', views.edit_password, name='edit_password'),
+    path('complete_change', views.complete_change, name='complete_change'),
 ]

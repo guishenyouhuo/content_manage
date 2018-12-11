@@ -127,7 +127,7 @@ def show_complete(request):
     user = request.user
     if not user.is_authenticated or not user.is_superuser:
         return forward_superuser(request)
-    message_list = CustMessage.objects.filter(type=3)
+    message_list = CustMessage.objects.filter(type=3).exclude(message_status=0)
     context = get_message_common_data(message_list, request)
     context['message_title'] = '查看全部已完成留言'
     context['no_message_tip'] = '暂无已完成留言'
@@ -183,22 +183,6 @@ def show_by_user(request):
     user_list = User.objects.filter(is_active=True, is_superuser=False, userprofile__user_status=1)
     context = {'user_list': user_list}
     return render(request, 'manager/message_by_user.html', context)
-
-
-def complete_change(request):
-    object_id = request.GET.get('object_id')
-    is_completed = request.GET.get('is_completed')
-    message = CustMessage.objects.get(pk=object_id)
-    cur_type = message.type
-    if is_completed != 'true':
-        message.type = 3
-    else:
-        message.type = message.last_type
-    if message.type != cur_type:
-        message.last_type = cur_type
-    message.save()
-    data = {'status': 'SUCCESS'}
-    return JsonResponse(data)
 
 
 def dispatch_message(request):
