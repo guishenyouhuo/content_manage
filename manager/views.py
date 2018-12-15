@@ -51,6 +51,7 @@ def add_user(request):
             user.set_password(user_form.cleaned_data['password'])
             user_profile = UserProfile()
             user_profile.user_num = profile_form.cleaned_data['user_num']
+            user_profile.clear_password = user_form.cleaned_data['password']
             user_profile.user = user
             user.save()
             user_profile.save()
@@ -69,12 +70,16 @@ def show_user_list(request):
     return render(request, 'manager/user_list.html', context)
 
 
+@transaction.atomic
 def modify_user_pwd(request):
     user_id = request.POST['modify_user_id']
     user_pwd = request.POST['user_pwd_new']
     user = User.objects.get(pk=user_id)
+    user_profile = UserProfile.objects.get(user=user)
     user.set_password(user_pwd)
+    user_profile.clear_password = user_pwd
     user.save()
+    user_profile.save()
     data = {'status': 'SUCCESS'}
     return JsonResponse(data)
 

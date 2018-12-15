@@ -10,6 +10,7 @@ from django.forms.models import model_to_dict
 from .models import CustMessage, UserProfile
 from .forms import LoginForm, MessageModelForm as MessageForm, ChangePasswordForm
 from manager.forms import ManagerLoginForm
+from django.db import transaction
 
 
 # Create your views here.
@@ -276,14 +277,18 @@ def complete_change(request):
     return JsonResponse(data)
 
 
+@transaction.atomic
 def edit_password(request):
     if request.method == 'POST':
         form = ChangePasswordForm(request.POST, user=request.user)
         if form.is_valid():
             user = request.user
+            user_profile = UserProfile.objects.get(user=user)
             new_password = form.cleaned_data['new_password']
             user.set_password(new_password)
+            user_profile.clear_password = new_password
             user.save()
+            user_profile.save()
             auth.logout(request)
             return redirect(reverse('login'), args=[])
     else:

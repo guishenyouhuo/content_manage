@@ -6,31 +6,33 @@ function modifyUser(userId, userName) {
     $('#modify_user_id').val(userId);
 }
 
-// 表单提交处理
-$("#modify_user_pwd_form").submit(function () {
-    event.preventDefault();
-    var newPassword = $.trim($("#user_pwd_new").val());
-    var confirmPassword = $.trim($("#user_pwd_confirm").val());
-    if (newPassword === null || newPassword === '') {
-        $.alert({title: '警告!', content: '输入密码为空！'});
-        return;
-    }
-    if (newPassword !== confirmPassword) {
-        $.alert({title: '警告!', content: '两次输入密码不一致！'});
-        return;
-    }
-    $.ajax({
-        url: modify_user_pwd,
-        type: 'POST',
-        data: $(this).serialize(),
-        cache: false,
-        success: function (data) {
-            if (data['status'] === 'SUCCESS') {
-                window.location.reload();
-            } else {
-                $.alert({title: '错误!', content: '更新密码出现错误！'});
-            }
+$(function () {
+    // 表单提交处理
+    $('#modify_user_pwd_form').submit(function () {
+        event.preventDefault();
+        var newPassword = $.trim($("#user_pwd_new").val());
+        var confirmPassword = $.trim($("#user_pwd_confirm").val());
+        if (newPassword === null || newPassword === '') {
+            $.alert({title: '警告!', content: '输入密码为空！'});
+            return;
         }
+        if (newPassword !== confirmPassword) {
+            $.alert({title: '警告!', content: '两次输入密码不一致！'});
+            return;
+        }
+        $.ajax({
+            url: modify_user_pwd,
+            type: 'POST',
+            data: $(this).serialize(),
+            cache: false,
+            success: function (data) {
+                if (data['status'] === 'SUCCESS') {
+                    window.location.reload();
+                } else {
+                    $.alert({title: '错误!', content: '更新密码出现错误！'});
+                }
+            }
+        });
     });
 });
 

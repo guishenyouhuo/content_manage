@@ -19,6 +19,7 @@
                     <tr>
                         <th>用户编号</th>
                         <th>用户姓名</th>
+                        <th>用户密码</th>
                         <th>修改密码</th>
                         <th>停用/启用</th>
                         <th>删除</th>
@@ -27,6 +28,7 @@
                         <tr>
                             <td>{{ user.user_num }}</td>
                             <td>{{ user.username }}</td>
+                            <td>{{ user.clear_password }}</td>
                             <td><button type="button" class="btn btn-link" onclick="modifyUser({{ user.pk }}, '{{ user.username }}')">修改密码</button></td>
                             {% if user.user_status == 1 %}
                                 <td><button type="button" class="btn btn-warning" onclick="changeUser({{ user.pk }}, '{{ user.username }}', {{ user.user_status }})">停用</button></td>

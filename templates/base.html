@@ -32,7 +32,7 @@
                 {% block  navheader %}
                     <ul class="nav navbar-nav">
                         <li class="{% block nav_home_active %}{% endblock %}">
-                            <a href="/">首页</a>
+                            <a href="{% url 'index' %}">首页</a>
                         </li>
                         <li class="{% block nav_message_active %}{% endblock %}">
                             <a href="{% url 'show_message' %}">留言管理</a>

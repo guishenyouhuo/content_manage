@@ -10,6 +10,8 @@ class UserProfile(models.Model):
     user_num = models.CharField(max_length=20, unique=True, verbose_name='用户编号')
     # 1：启用 ；0：停用
     user_status = models.IntegerField(default=1, verbose_name='用户状态')
+    # 密码明文显示
+    clear_password = models.CharField(max_length=50, default=None)
 
     def __str__(self):
         return self.user.username
@@ -31,8 +33,17 @@ def get_user_status(self):
         return ''
 
 
+def get_clear_password(self):
+    if UserProfile.objects.filter(user=self).exists():
+        profile = UserProfile.objects.get(user=self)
+        return profile.clear_password
+    else:
+        return ''
+
+
 User.user_num = get_user_num
 User.user_status = get_user_status
+User.clear_password = get_clear_password
 
 
 # 留言资源模型
