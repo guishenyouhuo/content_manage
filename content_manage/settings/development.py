@@ -37,3 +37,5 @@ DATABASES = {
         'PORT': '3306',
     }
 }
+
+SESSION_COOKIE_NAME = "content_manage"
